@@ -58,14 +58,15 @@ your class `MagazineArticlePostType`. The framework would then create a custom p
 - `$add_new_item`, `$edit_item`, `$new_item`, `$view_item`, `$search_items`, `$not_found`, `$not_found_in_trash` - 
  The various labels that would be passed into the `labels` argument of the `register_post_type` function. These are automatically
  calculated and passed to that function.
-- `$description` - The post type description
-- `$public` - Whether to make the post type public, create a UI and make it queryable (defaults to `true`)
-- `$queryable` - Whether to make the post type publicly queryable (defaults to the value of `$public`)
-- `$menu_position` - A number denoting the position on the WordPress dashboard menu for this type
-- `$capability_type` - The default capability of this type (defaults to `page`)
-- `$supports` - An array with the fields and functionality the type supports (defaults to `title`, `slug`, `editor` and `thumbnail`)
-- `$hierarchical` - Whether the post type is hierarchical (defaults to `true`)
-- `$parent` - the parent post type. If set, the link to the post type can be found in the menu of its parent type
+- `$description` - The post type description.
+- `$public` - Whether to make the post type public, create a UI and make it queryable (defaults to `true`).
+- `$show_ui` - Show a user interface for the post type (defaults to `true`).
+- `$queryable` - Whether to make the post type publicly queryable (defaults to the value of `$public`).
+- `$menu_position` - A number denoting the position on the WordPress dashboard menu for this type.
+- `$capability_type` - The default capability of this type (defaults to `page`).
+- `$supports` - An array with the fields and functionality the type supports (defaults to `title`, `slug`, `editor` and `thumbnail`).
+- `$hierarchical` - Whether the post type is hierarchical (defaults to `true`).
+- `$parent` - the parent post type. If set, the link to the post type can be found in the menu of its parent type.
 
 ### Custom fields
 
@@ -91,7 +92,8 @@ That field will automatically be rendered and saved by the framework, and is acc
 Any custom fields specified here and not mentioned in `$meta_boxes` will be automatically added to the Edit Post page.
 
 If you add a field name to the `$list_fields` array, it will be rendered in post list table. If your field uses a post type as
-its `type` property, a link to that post will be shown in that column.
+its `type` property, a link to that post will be shown in that column. If you set the `visible` key of the field array to
+`false`, it won't be automatically appended.
 
 Field labels are rendered in various places. They're taken from the field name, by replacing underscores with spaces and running
 the `ucwords` function over the resulting string.

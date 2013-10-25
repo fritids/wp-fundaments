@@ -107,6 +107,10 @@ class SktFundamentsContext {
 		echo $html;
 	}
 	
+	function label($name) {
+		echo ucwords(str_replace('_', ' ', $name));
+	}
+	
 	function view_exists($plugin, $name) {
 		return is_file(ABSPATH . "/wp-content/plugins/$plugin/views/$name.php");
 	}

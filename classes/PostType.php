@@ -7,12 +7,7 @@
 abstract class SktPostType {
 	private $plugin;
 	private $basename;
-	
-	public $name = 'Types';
-	public $menu_position = 4;
-	public $capability_type = 'page';
 	public $supports = array('title', 'slug', 'editor', 'thumbnail');
-	public $hierarchical = false;
 	
 	function __construct($plugin) {
 		if(isset($this->rewrite) && is_string($this->rewrite)) {
@@ -85,11 +80,12 @@ abstract class SktPostType {
 				'new_item' => isset($this->new_item) ? $this->new_item : ('New ' . ucwords($new_friendly_name)),
 				'view_item' => isset($this->view_item) ? $this->view_item : ('View ' . ucwords($new_friendly_name)),
 				'search_items' => isset($this->search_items) ? $this->search_items : ('Search ' . ucwords($new_friendly_name)),
-				'not_found' => isset($this->not_found) ? $this->not_found : ('No ' . $new_friendly_name . ' found'),
-				'not_found_in_trash' => isset($this->not_found_in_trash) ? $this->not_found_in_trash : ('No ' . $new_friendly_name . ' found in trash')
+				'not_found' => isset($this->not_found) ? $this->not_found : ('No ' . $new_friendly_name . 's found'),
+				'not_found_in_trash' => isset($this->not_found_in_trash) ? $this->not_found_in_trash : ('No ' . $new_friendly_name . 's found in trash')
 			),
 			'description' => isset($this->description) ? $this->description : 'Custom post type',
 			'public' => isset($this->public) ? $this->public : true,
+			'show_ui' => isset($this->show_ui) ? $this->show_ui : true,
 			'menu_position' => isset($this->menu_position) ? $this->menu_position : SKT_DEFAULT_MENU_POSITION,
 			'capability_type' => isset($this->capability_type) ? $this->capability_type : SKT_DEFAULT_CAPABILITY_TYPE,
 			'supports' => $this->supports,
@@ -236,7 +232,7 @@ abstract class SktPostType {
 				$has_view = false;
 				
 				if($GLOBALS['skt_fundaments']->view_exists($this->plugin, $view)) {
-					$func .= '$g->view("' . $this->plugin . '", "' . $view . '", array(';
+					$func .= '$g->view("' . $this->plugin . '", "' . $view . '", array("post" => $post, ';
 					
 					if(isset($this->fields)) {
 						foreach($fields as $i => $field) {
@@ -292,6 +288,11 @@ abstract class SktPostType {
 		foreach($fields as $field) {
 			if(in_array($field, $handled_fields)) {
 				continue;
+			}
+			
+			$attrs = $this->fieldattrs($field);
+			if(is_array($attrs) && isset($attrs['visible']) && !$attrs['visible']) {
+				return;
 			}
 			
 			$func = '$g = $GLOBALS[\'skt_fundaments\']; ';
@@ -396,6 +397,15 @@ abstract class SktPostType {
 		global $post;
 		
 		$data = $this->get_field($post, $column);
+		if(method_exists($this, "get_${column}_display")) {
+			echo call_user_func_array(
+				array($this, "get_${column}_display"),
+				array($data)
+			);
+			
+			return;
+		}
+		
 		if(is_object($data) && get_class($data) == 'WP_Post') {
 			echo edit_post_link($data->post_title, '', '', $post->ID);
 			return;

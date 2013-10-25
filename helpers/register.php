@@ -10,6 +10,10 @@ function skt_register_plugin($path) {
 		throw new Exception("Plugin $base not found");
 	}
 	
+	foreach (glob($path . '/helpers/*.php') as $filename) {
+		require_once($filename);
+	}
+	
 	foreach (glob($path . '/post_types/*.php') as $filename) {
 		require_once($filename);
 		$basename = basename($filename);
