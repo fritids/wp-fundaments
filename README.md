@@ -15,7 +15,7 @@ and upload it to your wp-content/plugins directory, then activate it through the
 
 An example bootstrap script is:
 
-```pip
+```php
 function myplugin_bootstrap() {
 	skt_register_plugin(dirname(__file__));
 }
