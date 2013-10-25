@@ -4,7 +4,7 @@
 * @package wp-fundaments
 */
 
-class SktFundamentsFormControllerBase extends SktFundamentsControllerBase {
+abstract class SktFundamentsFormControllerBase extends SktFundamentsControllerBase {
 	function widget($name, $options = null) {
 		return new Widget($name, $options);
 	}

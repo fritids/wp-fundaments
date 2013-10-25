@@ -4,7 +4,7 @@
 * @package wp-fundaments
 */
 
-class SktWidget {
+abstract class SktWidget {
 	public $html = '';
 	private $defaults = array(
 		'type' => 'text',

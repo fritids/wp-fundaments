@@ -4,7 +4,7 @@
 * @package wp-fundaments
 */
 
-class SktFundamentsControllerBase {
+abstract class SktFundamentsControllerBase {
 	public $menus = array();
 	public $notified = false;
 	public $ajax_actions = array();

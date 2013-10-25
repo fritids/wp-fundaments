@@ -33,6 +33,15 @@ abstract class SktPostType {
 		$this->plugin = $plugin;
 		$this->register_post_type();
 		
+		if(method_exists($this, "the_content")) {
+			add_filter('the_content', array(&$this, 'the_contents'));
+		}
+		
+		if(isset($this->list_fields)) {
+			add_filter('manage_' . $this->basename . '_posts_columns', array(&$this, 'post_columns'));
+			add_action('manage_' . $this->basename . '_posts_custom_column', array(&$this, 'post_columns_data'));
+		}
+		
 		add_action('save_post', array(&$this, 'save_post'));
 		add_filter('post_type_link', array(&$this, 'permalinks'), 10, 3);
 	}
@@ -69,7 +78,7 @@ abstract class SktPostType {
 		$args = array(
 			'label' => isset($this->label) ? $this->label : ucwords($new_friendly_name),
 			'labels' => array(
-				'name' => isset($this->label) ? $this->label : ucwords($new_friendly_name . 's'),
+				'name' => isset($this->name) ? $this->name : ucwords($new_friendly_name . 's'),
 				'singular_name' => isset($this->singular_name) ? $this->singular_name : ucwords($new_friendly_name),
 				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : ('Add New ' . ucwords($new_friendly_name)),
 				'edit_item' => isset($this->edit_item) ? $this->edit_item : ('Edit ' . ucwords($new_friendly_name)),
@@ -115,6 +124,10 @@ abstract class SktPostType {
 		return '_' . str_replace('-', '_', $this->plugin . '_' . $this->basename . '_' . $name);
 	}
 	
+	public function fieldlabel($name) {
+		return __(ucwords(str_replace('_', ' ', $name)));
+	}
+	
 	public function fieldtype($name) {
 		if(isset($this->fields) && is_array($this->fields)) {
 			if(isset($this->fields[$name])) {
@@ -152,7 +165,7 @@ abstract class SktPostType {
 				return get_post($ancestors[0]);
 			}
 			
-			return null;
+			return $default;
 		}
 		
 		$value = get_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field), true);
@@ -160,14 +173,16 @@ abstract class SktPostType {
 		
 		switch($type) {
 			case 'post':
-				return $value ? get_post($value) : null;
+				return $value ? get_post($value) : $deafult;
 			default:
 				if(substr($type, 0, 5) == 'post:') {
-					return $value ? get_post($value) : null;
+					return $value ? get_post($value) : $deafult;
 				}
 				
 				return $value;
 		}
+		
+		return $deafult;
 	}
 	
 	public function set_field($post, $field, $value) {
@@ -210,6 +225,7 @@ abstract class SktPostType {
 	
 	public function register_meta_boxes() {
 		$fields = $this->fieldnames();
+		$handled_fields = array();
 		
 		if(isset($this->meta_boxes) && is_array($this->meta_boxes)) {
 			foreach($this->meta_boxes as $key => $box) {
@@ -228,6 +244,8 @@ abstract class SktPostType {
 							if($i < count($fields) - 1) {
 								$func .= ', ';
 							}
+							
+							$handled_fields[] = $field;
 						}
 					}
 					
@@ -246,6 +264,8 @@ abstract class SktPostType {
 									default:
 										$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
 								}
+								
+								$handled_fields[] = $field;
 							}
 						}
 					}
@@ -268,15 +288,44 @@ abstract class SktPostType {
 				}
 			}
 		}
+		
+		foreach($fields as $field) {
+			if(in_array($field, $handled_fields)) {
+				continue;
+			}
+			
+			$func = '$g = $GLOBALS[\'skt_fundaments\']; ';
+			$func .= '$p = $g->get_post_type("' . $this->plugin . '", "' . $this->basename . '"); ';
+			$func .= 'global $post; ';
+			
+			switch($field) {
+				case '_parent':
+					$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("type" => "post:' . $this->parent . '", "value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
+					break;
+				default:
+					$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
+			}
+			
+			add_meta_box(
+				$this->basename . '_' . $field,
+				$this->fieldlabel($field),
+				create_function('', $func),
+				$this->basename
+			);
+		}
 	}
 	
 	public function save_post($post_id) {
 		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-			return $post_data;
+			return;
+		}
+		
+		if (defined('DOING_AJAX') && DOING_AJAX) {
+			return;
 		}
 		
 		if($_POST['post_type'] != $this->basename) {
-			return $post_id;
+			return;
 		}
 		
 		if(method_exists($this, "pre_save")) {
@@ -291,7 +340,7 @@ abstract class SktPostType {
 			$value = $_POST[$fieldname];
 			
 			if(method_exists($this, "save_field_${field}")) {
-				call_user_func_array(array($this, "save_field_${field}"), array($value));
+				call_user_func_array(array($this, "save_field_${field}"), array($post_id, $value));
 			} else {
 				if(isset($value) && !empty($value)) {
 					$this->set_field($post_id, $field, $value);
@@ -322,5 +371,36 @@ abstract class SktPostType {
 		}
 		
 		return $permalink;
+	}
+	
+	public function the_contents($content) {
+		global $post;
+		
+		$type = get_post_type($post);
+		if($type == $this->basename) {
+			return $this->the_content($post, $content);
+		}
+		
+		return $content;
+	}
+	
+	public function post_columns($columns) {
+		foreach($this->list_fields as $field) {
+			$columns[$field] = $this->fieldlabel($field);
+		}
+		
+		return $columns;
+	}
+	
+	public function post_columns_data($column) {
+		global $post;
+		
+		$data = $this->get_field($post, $column);
+		if(is_object($data) && get_class($data) == 'WP_Post') {
+			echo edit_post_link($data->post_title, '', '', $post->ID);
+			return;
+		}
+		
+		echo htmlentities($data);
 	}
 }
