@@ -1,0 +1,1 @@
+<?php add_action('load-profile.php', 'skt_profile_init', 98);

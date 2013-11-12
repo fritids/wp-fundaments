@@ -1,0 +1,4 @@
+.skt-fieldset-table { width: 100%; }
+.skt-fieldset-table th.skt-field-delete, .skt-fieldset-table td.skt-field-delete { width: 26px; }
+.skt-fieldset-table th, .skt-fieldset-table td { text-align: left; }
+.skt-fieldset-table th.skt-field-number, .skt-fieldset-table td.skt-field-number { width: 10%; }

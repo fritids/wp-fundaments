@@ -1,0 +1,1 @@
+<?php define('FILE_CACHE_DIRECTORY', $_SERVER['DOCUMENT_ROOT'] . '/wp-content/timthumb.cache');

@@ -1,78 +1,91 @@
 <?php /**
-* A base widget class
+* A basic widget class
 *
 * @package wp-fundaments
 */
 
-abstract class SktWidget {
-	public $html = '';
-	private $defaults = array(
-		'type' => 'text',
-		'value' => '',
-		'options' => array()
-	);
+abstract class SktWidget extends SktFieldManager {
+	public $basename = '';
+	public $plugin = '';
+	public $title = '';
+	public $description = '';
 	
-	function __construct($name, $options = null) {
-		if(is_array($options)) {
-			$options = array_merge($this->defaults, $options);
-		} else {
-			$options = array_merge($this->defaults);
+	function __construct($plugin) {
+		$this->plugin = $plugin;
+		$basename = get_class($this);
+		if(substr($basename, strlen($basename) - 6) == 'Widget') {
+			$basename = substr($basename, 0, strlen($basename) - 6);
 		}
 		
-		$name = "spektrix_$name";
-		extract($options);
-		$html = '';
+		$new_basename = '';
+		$new_friendly_name = '';
 		
-		switch($type) {
-			case 'color': case 'date': case 'datetime': case 'datetime-local':
-			case 'email': case 'month': case 'number': case 'range': case 'text':
-			case 'search': case 'tel': case 'time': case 'url': case 'week':
-				$html .= '<input name="' . esc_attr($name) . '" type="' . $type . '"';
-				if(isset($value) && !empty($value) && !is_null($value)) {
-					$html .= ' value="' . esc_attr($value) . '"';
+		for($i = 0; $i < strlen($basename); $i ++) {
+			$c = substr($basename, $i, 1);
+			if($c == strtoupper($c)) {
+				if($new_basename) {
+					$new_basename .= '_';
 				}
 				
-				if(isset($placeholder)) {
-					$html .= ' placeholder="' . esc_attr($placeholder) . '"';
+				if($new_friendly_name) {
+					$new_friendly_name .= ' ';
 				}
 				
-				$html .= ' />';
-				break;
+				$new_friendly_name .= strtolower($c);
+			} else {
+				$new_friendly_name .= $c;
+			}
 			
-			case 'select': case 'list':
-				if($type == 'list') {
-					$name .= '[]';
-				}
-				
-				$html .= '<select name="' . $name . '"';
-				
-				if($type == 'list') {
-					$html .= ' multiple';
-				}
-				
-				$html .= '>';
-				foreach($options as $key => $label) {
-					$html .= '<option value="' . esc_attr($key) . '"';
-					
-					if($type == 'list' && is_array($value)) {
-						if(in_array($key, $value)) {
-							$html .= ' selected';
-						}
-					} elseif((string)$key == (string)$value) {
-						$html .= ' selected';
-					}
-					
-					$html .= '>' . htmlentities($label) . '</option>';
-				}
-				
-				$html .= '</select>';
-				break;
+			$new_basename .= $c;
 		}
 		
-		$this->html = $html;
+		if(!$this->title) {
+			$this->title = $new_basename;
+		}
+		
+		$this->basename = strtolower($new_basename);
 	}
 	
-	function render() {
-		echo $this->html;
+	function register() {
+		$cls = 'SKT_Widget_' . ucfirst($this->basename);
+		eval("class $cls extends SktWidgetBase { protected \$plugin = '" . $this->plugin . "'; protected \$factory = '" . get_class($this) . "'; };");
+		register_widget($cls);
+	}
+	
+	function render($data) { ?>
+		<p>Define a <code>render</code> method in your <code><?php echo get_class($this); ?></code> class to print out the HTML</p>
+	<?php }
+	
+	function form($instance, $widget) {
+		foreach($this->fieldnames() as $field) {
+			$opts = $this->fieldattrs($field);
+			if (isset($instance[$field])) {
+				$opts['value'] = $instance[$field];
+			} elseif(isset($opts['default'])) {
+				$opts['value'] = $opts['default'];
+				unset($opts['default']);
+			}
+			
+			if(isset($opts['label'])) {
+				$label = $opts['label'];
+				unset($opts['label']);
+			} else {
+				$label = $this->fieldlabel($field);
+			}
+			
+			$field = new SktInputView($widget->get_field_name($field), $opts);
+			echo('<p><label>' . $label . '<br />');
+			$field->render();
+			echo('</label></p>');
+		}
+	}
+	
+	function update($data) {
+		$instance = array();
+		foreach($this->fieldnames() as $field) {
+			$instance[$field] = (!empty($data[$field])) ? strip_tags($data[$field]) : '';
+		}
+		
+		return $instance;
 	}
 }

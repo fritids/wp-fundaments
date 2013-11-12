@@ -96,7 +96,7 @@ its `type` property, a link to that post will be shown in that column. If you se
 `false`, it won't be automatically appended.
 
 Field labels are rendered in various places. They're taken from the field name, by replacing underscores with spaces and running
-the `ucwords` function over the resulting string.
+the `skt_ucwords` function over the resulting string.
 
 You don't need to worry about creating namespaces for your field names. Fundaments takes care of this by creating a field name
 derived from your plugin name, the post type and the field name. Custom field data is stored in the standard way, as post metadata.

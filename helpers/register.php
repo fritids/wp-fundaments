@@ -7,25 +7,23 @@
 function skt_register_plugin($path) {
 	$base = basename($path);
 	if(!is_dir($path)) {
-		throw new Exception("Plugin $base not found");
+		wp_die("Plugin <code>$base</code> not found");
 	}
 	
-	foreach (glob($path . '/helpers/*.php') as $filename) {
-		require_once($filename);
+	$GLOBALS['skt_fundaments']->register($path);
+	foreach(glob($path . '/mail/*.php') as $filename) {
+		$GLOBALS['skt_fundaments']->add_email_template($filename, 'plugin');
+	}
+}
+
+function skt_register_theme() {
+	$path = get_template_directory() . '/fundaments';
+	if(!is_dir($path)) {
+		wp_die("Directory <code>fundmanets</code> not found in theme");
 	}
 	
-	foreach (glob($path . '/post_types/*.php') as $filename) {
-		require_once($filename);
-		$basename = basename($filename);
-		if(substr($basename, strlen($basename) - 4) == '.php') {
-			$basename = substr($basename, 0, strlen($basename) - 4);
-		}
-		
-		$class = str_replace(' ', '', ucwords(str_replace('_', ' ', $basename))) . 'PostType';
-		if(!class_exists($class)) {
-			wp_die("Content type <code>$basename</code> detected, but no <code>$class</code> class found");
-		}
-		
-		$GLOBALS['skt_fundaments']->add_post_type($base, $basename, $class);
+	$GLOBALS['skt_fundaments']->register($path);
+	foreach(glob($path . '/mail/*.php') as $filename) {
+		$GLOBALS['skt_fundaments']->add_email_template($filename, 'plugin');
 	}
 }

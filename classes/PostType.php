@@ -4,10 +4,8 @@
  * @package wp-fundaments
  */
 
-abstract class SktPostType {
-	private $plugin;
-	private $basename;
-	public $supports = array('title', 'slug', 'editor', 'thumbnail');
+abstract class SktPostType extends SktFieldManager {
+	protected $supports = array('title', 'slug', 'editor', 'thumbnail');
 	
 	function __construct($plugin) {
 		if(isset($this->rewrite) && is_string($this->rewrite)) {
@@ -39,6 +37,7 @@ abstract class SktPostType {
 		
 		add_action('save_post', array(&$this, 'save_post'));
 		add_filter('post_type_link', array(&$this, 'permalinks'), 10, 3);
+		add_action('pre_get_posts', array(&$this, 'pre_get_posts'));
 	}
 	
 	private function register_post_type() {
@@ -71,15 +70,15 @@ abstract class SktPostType {
 		
 		$this->basename = strtolower($new_basename);
 		$args = array(
-			'label' => isset($this->label) ? $this->label : ucwords($new_friendly_name),
+			'label' => isset($this->label) ? $this->label : skt_ucwords($new_friendly_name),
 			'labels' => array(
-				'name' => isset($this->name) ? $this->name : ucwords($new_friendly_name . 's'),
-				'singular_name' => isset($this->singular_name) ? $this->singular_name : ucwords($new_friendly_name),
-				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : ('Add New ' . ucwords($new_friendly_name)),
-				'edit_item' => isset($this->edit_item) ? $this->edit_item : ('Edit ' . ucwords($new_friendly_name)),
-				'new_item' => isset($this->new_item) ? $this->new_item : ('New ' . ucwords($new_friendly_name)),
-				'view_item' => isset($this->view_item) ? $this->view_item : ('View ' . ucwords($new_friendly_name)),
-				'search_items' => isset($this->search_items) ? $this->search_items : ('Search ' . ucwords($new_friendly_name)),
+				'name' => isset($this->name) ? $this->name : skt_ucwords($new_friendly_name . 's'),
+				'singular_name' => isset($this->singular_name) ? $this->singular_name : skt_ucwords($new_friendly_name),
+				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : ('Add New ' . skt_ucwords($new_friendly_name)),
+				'edit_item' => isset($this->edit_item) ? $this->edit_item : ('Edit ' . skt_ucwords($new_friendly_name)),
+				'new_item' => isset($this->new_item) ? $this->new_item : ('New ' . skt_ucwords($new_friendly_name)),
+				'view_item' => isset($this->view_item) ? $this->view_item : ('View ' . skt_ucwords($new_friendly_name)),
+				'search_items' => isset($this->search_items) ? $this->search_items : ('Search ' . skt_ucwords($new_friendly_name) . 's'),
 				'not_found' => isset($this->not_found) ? $this->not_found : ('No ' . $new_friendly_name . 's found'),
 				'not_found_in_trash' => isset($this->not_found_in_trash) ? $this->not_found_in_trash : ('No ' . $new_friendly_name . 's found in trash')
 			),
@@ -95,10 +94,10 @@ abstract class SktPostType {
 		
 		if(isset($this->rewrite) && is_bool($this->rewrite)) {
 			$args['rewrite'] = $this->rewrite;
-		}
-		
-		if(isset($this->rewrite) && is_string($this->rewrite)) {
+		} elseif(isset($this->rewrite) && is_string($this->rewrite)) {
 			$args['rewrite'] = array('slug' => $this->rewrite);
+		} else {
+			$args['rewrite'] = array('slug' => strtolower($new_basename) . 's');
 		}
 		
 		if(isset($this->queryable)) {
@@ -107,51 +106,20 @@ abstract class SktPostType {
 		
 		if(isset($this->parent)) {
 			$args['has_archive'] = false;
+		} else {
+			$args['has_archive'] = isset($this->has_archive) ? $this->has_archive : true;
 		}
 		
 		if(isset($this->parent)) {
 			$args['show_in_menu'] = 'edit.php?post_type=' . $this->parent;
 		}
 		
+		if(isset($this->capabilities)) {
+			$args['capabilities'] = $thiscapabilities;
+		}
+		
 		register_post_type($this->basename, $args);
-	}
-	
-	public function fieldname($name) {
-		return '_' . str_replace('-', '_', $this->plugin . '_' . $this->basename . '_' . $name);
-	}
-	
-	public function fieldlabel($name) {
-		return __(ucwords(str_replace('_', ' ', $name)));
-	}
-	
-	public function fieldtype($name) {
-		if(isset($this->fields) && is_array($this->fields)) {
-			if(isset($this->fields[$name])) {
-				return isset($this->fields[$name]['type']) ? $this->fields[$name]['type'] : SKT_DEFAULT_FIELD_TYPE;
-			}
-		}
-		
-		return SKT_DEFAULT_FIELD_TYPE;
-	}
-	
-	public function fieldattrs($name, $extra = array()) {
-		$attrs = array();
-		
-		if(isset($this->fields) && is_array($this->fields)) {
-			if(isset($this->fields[$name])) {
-				$attrs = $this->fields[$name];
-			}
-		};
-		
-		if(!isset($attrs['type'])) {
-			$attrs['type'] = SKT_DEFAULT_FIELD_TYPE;
-		}
-		
-		if(isset($extra) && is_array($extra)) {
-			$attrs = array_merge($attrs, $extra);
-		}
-		
-		return $attrs;
+		flush_rewrite_rules();
 	}
 	
 	public function get_field($post, $field, $default = null) {
@@ -164,21 +132,19 @@ abstract class SktPostType {
 			return $default;
 		}
 		
-		$value = get_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field), true);
-		$type = $this->fieldtype($field);
-		
-		switch($type) {
-			case 'post':
-				return $value ? get_post($value) : $deafult;
-			default:
-				if(substr($type, 0, 5) == 'post:') {
-					return $value ? get_post($value) : $deafult;
-				}
-				
-				return $value;
+		if($default == null) {
+			$attrs = $this->fieldattrs($field);
+			if(isset($attrs['default'])) {
+				$default = $attrs['default'];
+			}
 		}
 		
-		return $deafult;
+		$value = skt_unserialise_field_value(
+			get_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field), true),
+			$this->fieldtype($field)
+		);
+		
+		return $value ? $value : $default;
 	}
 	
 	public function set_field($post, $field, $value) {
@@ -197,26 +163,6 @@ abstract class SktPostType {
 	
 	public function delete_field($post, $field) {
 		delete_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field));
-	}
-	
-	public function fieldnames() {
-		$fields = array();
-		
-		if(isset($this->fields) && is_array($this->fields)) {
-			foreach($this->fields as $i => $field) {
-				if(is_array($field)) {
-					$fields[] = $i;
-				} else {
-					$fields[] = $field;
-				}
-			}
-		}
-		
-		if(isset($this->parent) && $this->parent) {
-			$fields[] = '_parent';
-		}
-		
-		return $fields;
 	}
 	
 	public function register_meta_boxes() {
@@ -268,16 +214,16 @@ abstract class SktPostType {
 					
 					add_meta_box(
 						$this->basename . '_' . $key,
-						isset($box['title']) ? $box['title'] : ucwords(str_replace('_', ' ', $key)),
+						isset($box['title']) ? $box['title'] : skt_ucwords(str_replace('_', ' ', $key)),
 						create_function('', $func),
 						$this->basename,
 						isset($box['context']) ? $box['context'] : 'normal',
-						isset($box['priority']) ? $box['priority'] : 'default'
+						isset($box['priority']) ? $box['priority'] : 'core'
 					);
 				} else {
 					add_meta_box(
 						$this->basename . '_' . $box,
-						ucwords(str_replace('_', ' ', $box)),
+						skt_ucwords(str_replace('_', ' ', $box)),
 						create_function('', $func),
 						$this->basename
 					);
@@ -338,7 +284,7 @@ abstract class SktPostType {
 		remove_action('save_post', array(&$this, 'save_post'));
 		foreach($this->fieldnames() as $field) {
 			$fieldname = $this->fieldname($field);
-			$value = $_POST[$fieldname];
+			$value = $this->POST($field);
 			
 			if(method_exists($this, "save_field_${field}")) {
 				call_user_func_array(array($this, "save_field_${field}"), array($post_id, $value));
@@ -396,21 +342,139 @@ abstract class SktPostType {
 	public function post_columns_data($column) {
 		global $post;
 		
-		$data = $this->get_field($post, $column);
-		if(method_exists($this, "get_${column}_display")) {
-			echo call_user_func_array(
-				array($this, "get_${column}_display"),
-				array($data)
-			);
+		$datas = $this->get_field($post, $column);
+		$type = $this->fieldtype($column);
+		
+		if(!is_array($datas)) {
+			$datas = array($datas);
+		}
+		
+		$attrs = $this->fieldattrs($column);
+		
+		foreach($datas as $i => $data) {
+			if($i > 0) {
+				echo '<br />';
+			}
 			
-			return;
+			switch($type) {
+				case 'date':
+					echo date('j M Y', $data);
+					echo '<br />';
+					echo date('H:i:s', $data);
+					return;
+			}
+			
+			if(method_exists($this, "get_${column}_display")) {
+				echo call_user_func_array(
+					array($this, "get_${column}_display"),
+					array($data)
+				);
+				
+				continue;
+			}
+			
+			switch($type) {
+				case 'select': case 'radio':
+					$choices = isset($attrs['choices']) ? $attrs['choices'] : array();
+					foreach($choices as $key => $value) {
+						if((string)$key == (string)$data) {
+							echo htmlentities($value);
+						}
+					}
+					
+					return;
+				case 'checkbox':
+					$choices = isset($attrs['choices']) ? $attrs['choices'] : array();
+					foreach($choices as $key => $value) {
+						if((string)$data == (string)$key) {
+							echo htmlentities($value);
+						}
+					}
+					
+					continue;
+			}
+			
+			if(is_object($data) && get_class($data) == 'WP_Post') {
+				echo edit_post_link($data->post_title, '', '', $post->ID);
+				continue;
+			}
+			
+			if($type != 'checkbox') {
+				echo htmlentities($data);
+			}
+		}
+	}
+	
+	public function query_args($args) {
+		$defaults = array();
+		
+		if(isset($this->order_by)) {
+			$fieldnames = $this->fieldnames();
+			if(in_array($this->order_by, $fieldnames)) {
+				$defaults['meta_key'] = $this->fieldname($this->order_by);
+				switch($this->fieldtype($this->order_by)) {
+					case 'integer': case 'number': case 'date':
+						$defaults['orderby'] = 'meta_value_num';
+						break;
+					default:
+						$defaults['orderby'] = 'meta_value';
+				}
+			} else {
+				$defaults['orderby'] = $this->order_by;
+			}
+			
+			$defaults['order'] = 'ASC';
 		}
 		
-		if(is_object($data) && get_class($data) == 'WP_Post') {
-			echo edit_post_link($data->post_title, '', '', $post->ID);
-			return;
+		if(isset($args['fields'])) {
+			$fields = $args['fields'];
+			unset($args['fields']);
+			
+			$meta_query = isset($args['meta_query']) ? $args['meta_query'] : array();
+			foreach($fields as $field => $value) {
+				switch($field) {
+					case '_parent':
+						$args['post_parent'] = $value;
+						break;
+					default:
+						$meta_query[] = array(
+							'key' => $this->fieldname($field),
+							'value' => $value
+						);
+				}
+			}
+			
+			$args['meta_query'] = $meta_query;
 		}
 		
-		echo htmlentities($data);
+		$args = array_merge(
+			array('post_type' => $this->basename),
+			array_merge($defaults, is_array($args) ? $args : array())
+		);
+		
+		return $args;
+	}
+	
+	public function pre_get_posts($query) {
+		if(is_admin() && $query->query_vars['post_type'] == $this->basename) {
+			if(isset($this->order_by)) {
+				$fieldnames = $this->fieldnames();
+				
+				if(in_array($this->order_by, $fieldnames) === true) {
+					$query->set('meta_key', $this->fieldname($this->order_by));
+					switch($this->fieldtype($this->order_by)) {
+						case 'integer': case 'number': case 'date':
+							$query->set('orderby', 'meta_value_num');
+							break;
+						default:
+							$query->set('orderby', 'meta_value');
+					}
+				} else {
+					$query->set('orderby', $this->order_by);
+				}
+				
+				$query->set('order', 'ASC');
+			}
+		}
 	}
 }
