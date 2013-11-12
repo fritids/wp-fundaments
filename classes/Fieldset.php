@@ -20,12 +20,7 @@ class SktFieldset extends SktFieldManager {
 		
 		foreach($this->fieldnames() as $field) {
 			$attrs = $this->fieldattrs($field);
-			$label = isset($attrs['label']) ? $attrs['label'] : $this->fieldlabel($field);
 			$type = $this->fieldtype($field);
-			
-			if(isset($attrs['label'])) {
-				unset($attrs['label']);
-			}
 			
 			$attrs['value'] = isset($values[$field]) ? $values[$field] : null;
 			$name = $this->name . '__' . $index . '__' . $field;
@@ -46,18 +41,14 @@ class SktFieldset extends SktFieldManager {
 		
 		foreach($this->fieldnames() as $field) {
 			$attrs = $this->fieldattrs($field);
-			$label = isset($attrs['label']) ? $attrs['label'] : $this->fieldlabel($field);
+			$label = $this->fieldlabel($field);
 			$type = $this->fieldtype($field);
 			
 			if($type == 'fieldset') {
 				wp_die('Nested fieldsets are currently not supported');
 			}
 			
-			if(isset($attrs['label'])) {
-				unset($attrs['label']);
-			}
-			
-			$html .= '<th class="skt-field-' . $type . '">' . htmlentities($label) . '</th>';
+			$html .= '<th class="skt-field-' . $type . '">' . $label . '</th>';
 			$mgmt[$field] = $attrs;
 		}
 		

@@ -17,8 +17,29 @@ abstract class SktFieldManager {
 		return '_' . str_replace('-', '_', $this->plugin . '_' . $this->basename . '_' . $name);
 	}
 	
-	public function fieldlabel($name) {
-		return __(skt_ucwords(str_replace('_', ' ', $name)));
+	public function fieldlabel($name, $id = null) {
+		$attrs = $this->fieldattrs($name);
+		$type = $this->fieldtype($name);
+		
+		if(isset($attrs['label'])) {
+			$label = __($attrs['label']);
+		} else {
+		 	$label = __(skt_ucwords(str_replace('_', ' ', $name)));
+		}
+		
+		if(!$id) {
+			if(isset($attrs['id'])) {
+				$id = $attrs['id'];
+			} else {
+				$id = 'id' . $this->fieldname($name);
+			
+				if($type == 'date' || $type == 'datetime') {
+					$id .= '_year';
+				}
+			}
+		}
+		
+		return '<label for="' . esc_attr($id) . '">' . htmlentities($label) . '</label>';
 	}
 	
 	public function fieldtype($name) {

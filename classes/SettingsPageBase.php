@@ -138,11 +138,8 @@ abstract class SktSettingsPageBase extends SktFieldManager {
 		if($type == 'checkbox') {
 			$opts['label'] = isset($opts['label']) ? $opts['label'] : $this->fieldlabel($key);
 			$label = '';
-		} elseif(isset($opts['label'])) {
-			$label = "<label for=\"id{$fieldname}\">" . $opts['label'] . "</label>";
-			unset($opts['label']);
 		} else {
-			$label = "<label for=\"id{$fieldname}\">" . $this->fieldlabel($key) . "</label>";
+			$label = $this->fieldlabel($key);
 		}
 		
 		register_setting($class, $fieldname);

@@ -121,13 +121,14 @@ abstract class SktProfile extends SktFieldManager {
 			} else {
 				$key = $opts;
 				$attrs = array();
-			} ?>
+			}
+			
+			$type = $this->fieldtype($key); ?>
 			
 			<tr>
 				<th scope="row" valign="top">
-					<label><?php echo htmlentities(isset($attrs['label']) ? $attrs['label'] : $GLOBALS['skt_fundaments']->label($key)); ?></label>
-					<?php if(isset($attrs['label'])) {
-						unset($attrs['label']);
+					<?php if($type != 'boolean') {
+						echo $this->fieldlabel($key);
 					} ?>
 				</th>
 				<td>

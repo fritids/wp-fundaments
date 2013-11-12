@@ -57,26 +57,24 @@ abstract class SktWidget extends SktFieldManager {
 	<?php }
 	
 	function form($instance, $widget) {
-		foreach($this->fieldnames() as $field) {
-			$opts = $this->fieldattrs($field);
-			if (isset($instance[$field])) {
-				$opts['value'] = $instance[$field];
+		foreach($this->fieldnames() as $key) {
+			$opts = $this->fieldattrs($key);
+			if (isset($instance[$key])) {
+				$opts['value'] = $instance[$key];
 			} elseif(isset($opts['default'])) {
 				$opts['value'] = $opts['default'];
 				unset($opts['default']);
 			}
 			
-			if(isset($opts['label'])) {
-				$label = $opts['label'];
-				unset($opts['label']);
-			} else {
-				$label = $this->fieldlabel($field);
+			$field = new SktInputView($widget->get_field_name($key), $opts);
+			echo('<p>');
+			
+			if($type != 'boolean') {
+			 	echo($this->fieldlabel($key, 'id' . $widget->get_field_name($key)) . '<br />');
 			}
 			
-			$field = new SktInputView($widget->get_field_name($field), $opts);
-			echo('<p><label>' . $label . '<br />');
 			$field->render();
-			echo('</label></p>');
+			echo('</p>');
 		}
 	}
 	

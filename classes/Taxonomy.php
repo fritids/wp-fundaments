@@ -111,11 +111,11 @@ abstract class SktTaxonomy extends SktFieldManager {
 			}
 			
 			$fname = $this->fieldname($key);
-			if(!isset($attrs['label'])) {
-				$attrs['label'] = skt_ucwords(str_replace('_', ' ', $key));
-			} ?>
-			
+			$type = $this->fieldtype($key); ?>
 			<div class="form-field">
+				<?php if($type != 'boolean') {
+					echo $this->fieldlabel($key);
+				} ?>
 				<?php $GLOBALS['skt_fundaments']->input($fname, $attrs); ?>
 			</div>
 		<?php }
@@ -159,13 +159,14 @@ abstract class SktTaxonomy extends SktFieldManager {
 			} else {
 				$key = $opts;
 				$attrs = array();
-			} ?>
+			}
+			
+			$type = $this->fieldtype($key); ?>
 			
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<?php $GLOBALS['skt_fundaments']->label($key);
-					if(isset($attrs['label'])) {
-						unset($attrs['label']);
+					<?php if($type != 'boolean') {
+						echo $this->fieldlabel($key);
 					} ?>
 				</th>
 				<td>

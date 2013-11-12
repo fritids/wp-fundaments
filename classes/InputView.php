@@ -120,7 +120,6 @@ class SktInputView extends SktView {
 		$self_closing = true;
 		$label_id = '';
 		$add_type = true;
-		$label_before = true;
 		$label_after = false;
 		
 		switch($type) {
@@ -130,7 +129,6 @@ class SktInputView extends SktView {
 				$add_type = false;
 				break;
 			case 'checkbox': case 'radio':
-				$label_before = false;
 				$label_after = true;
 				if(isset($attrs['choices'])) {
 					if(isset($attrs['value'])) {
@@ -165,6 +163,15 @@ class SktInputView extends SktView {
 					
 					$attrs['value'] = '1';
 				}
+				
+				break;
+			case 'float':
+				$type = 'number';
+				if(!isset($attrs['step'])) {
+					$attrs['step'] = 'any';
+				}
+				
+				break;
 			default:
 				if(substr($type, 0, 5) == 'post:') {
 					$post_type = substr($type, 5);
@@ -221,12 +228,6 @@ class SktInputView extends SktView {
 		
 		if(!isset($attrs['id'])) {
 			$attrs['id'] = 'id' . $name;
-		}
-		
-		if($label_before) {
-			if(isset($attrs['label'])) {
-				$this->html = '<label for="' . $attrs['id'] . '">' . esc_html($attrs['label']) . '</label>';
-			}
 		}
 		
 		$this->html .= '<' . $tag . ' name="' . $name . '"';

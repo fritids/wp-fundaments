@@ -201,10 +201,14 @@ abstract class SktPostType extends SktFieldManager {
 							foreach($box['fields'] as $field) {
 								switch($field) {
 									case '_parent':
-										$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("type" => "post:' . $this->parent . '", "value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
+										$func .= 'echo $p->fieldlabel("' . $field . '") . "<br />"; $g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("type" => "post:' . $this->parent . '", "value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
 										break;
 									default:
-										$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
+										if($this->fieldtype($field) != 'boolean') {
+											$func .= 'echo $p->fieldlabel("' . $field . '") . "<br />";';
+										}
+										
+										$func .= 'echo $g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
 								}
 								
 								$handled_fields[] = $field;
@@ -358,6 +362,9 @@ abstract class SktPostType extends SktFieldManager {
 			
 			switch($type) {
 				case 'date':
+					echo date('j M Y', $data);
+					return;
+				case 'datetime':
 					echo date('j M Y', $data);
 					echo '<br />';
 					echo date('H:i:s', $data);
