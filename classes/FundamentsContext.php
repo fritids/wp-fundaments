@@ -12,6 +12,7 @@ class SktFundamentsContext {
 	private $profiles = array();
 	private $sync_controllers = array();
 	private $email_templates = array();
+	private $vendor_libs = array();
 	
 	function register($path) {
 		$base = basename($path);
@@ -174,6 +175,16 @@ class SktFundamentsContext {
 					)
 				);
 			}
+		}
+		
+		foreach(glob($path . '/vendor/*') as $filename) {
+			require_once($filename);
+			$basename = basename($filename);
+			if(substr($basename, strlen($basename) - 4) == '.php') {
+				$basename = substr($basename, 0, strlen($basename) - 4);
+			}
+			
+			$this->vendor_libs[$basename] = $filename;
 		}
 	}
 	
@@ -345,6 +356,15 @@ class SktFundamentsContext {
 			);
 			
 			wp_mail($to, $subject, $message, $headers);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public function include_vendor_library($name) {
+		if(isset($this->vendor_libs[$name]) {
+			require_once($this->vendor_libs[$name]);
 			return true;
 		}
 		
