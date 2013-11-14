@@ -14,8 +14,10 @@ class SktFundamentsContext {
 	private $email_templates = array();
 	private $vendor_libs = array();
 	
-	function register($path) {
-		$base = basename($path);
+	function register($path, $base = '') {
+		if(!$base) {
+			$base = basename($path);
+		}
 		
 		foreach(glob($path . '/helpers/*.php') as $filename) {
 			require_once($filename);

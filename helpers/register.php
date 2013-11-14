@@ -22,7 +22,10 @@ function skt_register_theme() {
 		wp_die("Directory <code>fundmanets</code> not found in theme");
 	}
 	
-	$GLOBALS['skt_fundaments']->register($path);
+	$GLOBALS['skt_fundaments']->register($path,
+		basename(get_template_directory())
+	);
+	
 	foreach(glob($path . '/mail/*.php') as $filename) {
 		$GLOBALS['skt_fundaments']->add_email_template($filename, 'plugin');
 	}
