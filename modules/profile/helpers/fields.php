@@ -1,5 +1,8 @@
-<?php add_action('skt_open_profile_fieldset', 'skt_open_profile_fieldset', 10, 1);
-function skt_open_profile_fieldset($legend = '') {
+<?php function skt_open_profile_fieldset($legend = '') {
+	if(apply_filters('skt_open_profile_fieldset', $legend)) {
+		return;
+	}
+	
 	echo '<fieldset>';
 	
 	if($legend) {
@@ -7,13 +10,19 @@ function skt_open_profile_fieldset($legend = '') {
 	}
 }
 
-add_action('skt_close_profile_fieldset', 'skt_close_profile_fieldset');
 function skt_close_profile_fieldset() {
+	if(apply_filters('skt_close_profile_fieldset', '')) {
+		return;
+	}
+	
 	echo '</fieldset>';
 }
 
-add_action('skt_profile_field', 'skt_profile_field', 10, 2);
-function skt_profile_field($fname, $attrs) { ?>
+function skt_profile_field($fname, $attrs) {
+	if(apply_filters('skt_profile_field', $fname, $attrs)) {
+		return;
+	} ?>
+	
 	<p>
 		<label>
 			<?php echo htmlentities($attrs['label']); ?>

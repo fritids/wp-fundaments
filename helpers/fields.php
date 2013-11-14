@@ -80,6 +80,10 @@ function skt_get_field($field, $post_id = null) {
 	return null;
 }
 
+function skt_the_field($field, $post_id = null) {
+	echo htmlentities(skt_get_field($field, $post_id));
+}
+
 function skt_update_field($field, $value, $post_id = null) {
 	if(!$post_id) {
 		$post_id = get_the_ID();

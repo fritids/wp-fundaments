@@ -58,7 +58,7 @@ abstract class SktSettingsPageBase extends SktFieldManager {
 		
 		$registered = array();
 		if(isset($this->sections) && is_array($this->sections)) {
-			foreach($this->sections as $profile => $opts) {
+			foreach($this->sections as $section => $opts) {
 				if(is_array($opts)) {
 					$view = new SktView(
 						isset($opts['description']) ? wpautop($opts['description']) : ''
@@ -66,15 +66,15 @@ abstract class SktSettingsPageBase extends SktFieldManager {
 					
 					add_settings_section(
 						"${class}_${section}",
-						isset($opts['title']) ? $opts['title'] : skt_ucwords(str_replace('_', ' ', $profile)),
+						isset($opts['title']) ? $opts['title'] : skt_ucwords(str_replace('_', ' ', $section)),
 						array($view, 'render'),
 						$class
 					);
 					
 					if(isset($opts['fields'])) {
-						foreach($opts['fields'] as $key) {
-							$this->add_field($key, $profile);
-							$registered[] = $key;
+						foreach($opts['fields'] as $k) {
+							$this->add_field($k, $section);
+							$registered[] = $k;
 						}
 					}
 				} else {
@@ -109,7 +109,7 @@ abstract class SktSettingsPageBase extends SktFieldManager {
 		}
 	}
 	
-	protected function add_field($key, $profile) {
+	protected function add_field($key, $section) {
 		$class = get_class($this);
 		$opts = $this->fieldattrs($key);
 		$type = $this->fieldtype($key);

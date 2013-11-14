@@ -45,6 +45,7 @@ abstract class SktProfile extends SktFieldManager {
 		add_action('personal_options_update', array(&$this, 'save_form_fields'));
 		add_action('edit_user_profile_update', array(&$this, 'save_form_fields'));
 		add_action('user_register', array(&$this, 'save_form_fields'));
+		add_action('user_register', array(&$this, 'user_register'), 1000);
 		
 		add_action('register_form', array(&$this, 'register_form'));
 		add_filter('registration_errors', array(&$this, 'registration_errors'), 10, 3);
@@ -83,7 +84,7 @@ abstract class SktProfile extends SktFieldManager {
 			}
 			
 			if (!$user->has_cap('edit_posts')) {
-				do_action('skt_open_profile_fieldset', $this->name);
+				skt_open_profile_fieldset($this->name);
 				foreach($this->fields as $field => $opts) {
 					if(is_array($opts)) {
 						$key = $field;
@@ -103,10 +104,10 @@ abstract class SktProfile extends SktFieldManager {
 					
 					$attrs['value'] = $this->get_field($user, $key);
 					$fname = $this->fieldname($key);
-					do_action('skt_profile_field', $fname, $attrs);
+					skt_profile_field($fname, $attrs);
 				}
 				
-				do_action('skt_close_profile_fieldset');
+				skt_close_profile_fieldset();
 				return;
 			}
 		}
@@ -153,7 +154,7 @@ abstract class SktProfile extends SktFieldManager {
 	}
 	
 	public function register_form() {
-		do_action('skt_open_signup_fieldset', $this->name);
+		skt_open_signup_fieldset($this->name);
 		foreach($this->fields as $field => $opts) {
 			if(is_array($opts)) {
 				$key = $field;
@@ -173,10 +174,15 @@ abstract class SktProfile extends SktFieldManager {
 			
 			$attrs['value'] = $this->POST($key);
 			$fname = $this->fieldname($key);
-			do_action('skt_signup_field', $fname, $attrs);
+			
+			if(method_exists($this, "render_${key}")) {
+				call_user_method("render_${key}", $this, $attrs);
+			} else {
+				skt_signup_field($fname, $attrs);
+			}
 		}
 		
-		do_action('skt_close_signup_fieldset');
+		skt_close_signup_fieldset();
 	}
 	
 	public function registration_errors($errors, $sanitized_user_login, $user_email) {
@@ -199,11 +205,25 @@ abstract class SktProfile extends SktFieldManager {
 			
 			if(isset($attrs['required']) && $attrs['required']) {
 				$errors->add("empty_${key}",
-					'<strong>ERROR</strong>: ' . _('The ' . $this->fieldlabel($key) . '</strong> field is required.')
+					'<strong>ERROR</strong>: ' . _('The ' . skt_ucwords(str_replace('_', ' ', $key)) . '</strong> field is required.')
 				);
 			}
 		}
 		
 		return $errors;
+	}
+	
+	public function user_register($user_id) {
+		$data = array();
+		
+		foreach($this->fieldnames() as $field) {
+			$data[$field] = $this->get_field($user_id, $field);
+		}
+		
+		$this->user_registered($user_id, $data);
+	}
+	
+	protected function user_registered($user_id, $data) {
+		
 	}
 }

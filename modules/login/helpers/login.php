@@ -60,14 +60,14 @@ function skt_login_form_print() {
 	} ?>
 	
 	<form class="loginform" action="<?php bloginfo('wpurl'); ?>/wp-login.php" method="post">
-		<?php do_action('skt_signup_field', 'log',
+		<?php skt_signup_field('log',
 			array(
 				'label' => 'Username',
 				'value' => isset($_POST['log']) ? $_POST['log'] : null
 			)
 		);
 		
-		do_action('skt_signup_field', 'pwd',
+		skt_signup_field('pwd',
 			array(
 				'label' => 'Password',
 				'type' => 'password'

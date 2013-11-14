@@ -146,7 +146,7 @@ class SktInputView extends SktView {
 					
 					$attrs['value'] = $nv;
 					foreach($attrs['choices'] as $key => $value) {
-						$this->html .= '<label><input type="checkbox" name="' . $name . '[]" value="' . esc_attr($key) . '"';
+						$this->html .= '<label><input type="' . $type . '" name="' . $name . '[]" value="' . esc_attr($key) . '"';
 						if($attrs['value'] && in_array((string)$key, $attrs['value'])) {
 							$this->html .= ' checked';
 						}

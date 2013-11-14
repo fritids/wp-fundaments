@@ -109,7 +109,7 @@ function skt_register_form_print() {
 	} ?>
 	
 	<form class="loginform" name="registerform" id="registerform" action="<?php echo site_url('wp-login.php?action=register', 'login_post') ?>" method="post">
-		<?php do_action('skt_signup_field', 'first_name',
+		<?php skt_signup_field('first_name',
 			array(
 				'value' => isset($_POST['first_name']) ? $_POST['first_name'] : null,
 				'label' => 'First Name',
@@ -117,7 +117,7 @@ function skt_register_form_print() {
 			)
 		);
 		
-		do_action('skt_signup_field', 'last_name',
+		skt_signup_field('last_name',
 			array(
 				'value' => isset($_POST['last_name']) ? $_POST['last_name'] : null,
 				'label' => 'Last Name',
@@ -125,7 +125,7 @@ function skt_register_form_print() {
 			)
 		);
 		
-		do_action('skt_signup_field', 'user_login',
+		skt_signup_field('user_login',
 			array(
 				'label' => 'Choose a Username',
 				'value' => isset($_POST['user_login']) ? $_POST['user_login'] : null,
@@ -133,7 +133,7 @@ function skt_register_form_print() {
 			)
 		);
 		
-		do_action('skt_signup_field', 'user_email',
+		skt_signup_field('user_email',
 			array(
 				'type' => 'email',
 				'label' => 'Email Address',
@@ -142,7 +142,7 @@ function skt_register_form_print() {
 			)
 		);
 		
-		do_action('skt_signup_field', 'user_pass',
+		skt_signup_field('user_pass',
 			array(
 				'label' => 'Password',
 				'type' => 'password',
@@ -151,7 +151,7 @@ function skt_register_form_print() {
 			)
 		);
 		
-		do_action('skt_signup_field', 'pass_confirm',
+		skt_signup_field('pass_confirm',
 			array(
 				'label' => 'Confirm Password',
 				'type' => 'password',
