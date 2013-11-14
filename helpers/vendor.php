@@ -1,4 +1,4 @@
-<?phpp /**
+<?php /**
  * Shortcut functions to inclusion of third-party PHP files
  *
  * @package vendorwp-fundaments
