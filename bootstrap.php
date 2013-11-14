@@ -3,7 +3,7 @@ Plugin Name: Fundaments
 Plugin URI: https://github.com/substrakt/wp-fundaments
 Description: A grown-up framework for building well-rounded WordPress plugins
 Author: Mark Steadman
-Version: 0.1
+Version: 0.01a
 Author URI: http://substrakt.co.uk/
 *
 * @package wp-fundaments
