@@ -363,7 +363,7 @@ class SktFundamentsContext {
 	}
 	
 	public function include_vendor_library($name) {
-		if(isset($this->vendor_libs[$name]) {
+		if(isset($this->vendor_libs[$name])) {
 			require_once($this->vendor_libs[$name]);
 			return true;
 		}
