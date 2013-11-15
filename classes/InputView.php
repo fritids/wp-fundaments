@@ -10,6 +10,7 @@ class SktInputView extends SktView {
 			$attrs = array();
 		}
 		
+		$attrs = apply_filters('skt_formfield_attrs', $attrs);
 		$type = isset($attrs['type']) ? $attrs['type'] : 'text';
 		
 		if($type == 'media') {
@@ -145,16 +146,28 @@ class SktInputView extends SktView {
 					}
 					
 					$attrs['value'] = $nv;
+					$this->html .= '<ul';
+					
+					if(isset($attrs['class'])) {
+						$this->html .= ' class="' . esc_attr($attrs['class']) . '"';
+					}
+					
+					$this->html .= '>';
 					foreach($attrs['choices'] as $key => $value) {
+						$this->html .= '<li>';
 						$this->html .= '<label><input type="' . $type . '" name="' . $name . '[]" value="' . esc_attr($key) . '"';
+						
 						if($attrs['value'] && in_array((string)$key, $attrs['value'])) {
 							$this->html .= ' checked';
 						}
 						
-						$this->html .= ' /> ' . esc_html($value) . '</label><br />';
+						$this->html .= ' /> ' . esc_html($value) . '</label>';
+						$this->html .= '</li>';
 					}
+					
 					unset($attrs['choices']);
 					unset($attrs['value']);
+					$this->html .= '</ul>';
 					return;
 				} else {
 					if($value = isset($attrs['value']) ? $attrs['value'] : '') {
@@ -210,24 +223,34 @@ class SktInputView extends SktView {
 						)
 					);
 					
+					$this->html .= '<ul';
+					if(isset($attrs['class'])) {
+						$this->html .= ' class="' . esc_attr($attrs['class']) . '"';
+					}
+					
+					$this->html .= '>';
 					foreach($posts as $i => $p) {
+						$this->html .= '<li>';
 						$this->html .= '<label><input type="' . ($multiple ? 'checkbox' : 'radio') . '" name="' . $name . '[]" value="' . esc_attr($p->ID) . '"';
 						if(in_array($p->ID, $vv)) {
 							$this->html .= ' checked';
 						}
 						
 						$this->html .= ' /> ' . esc_html($p->post_title) . '</label>';
-						if($i < count($posts) - 1) {
-							$this->html .= '<br />';
-						}
+						$this->html .= '</li>';
 					}
 					
+					$this->html .= '</ul>';
 					return;
 				}
 		}
 		
 		if(!isset($attrs['id'])) {
 			$attrs['id'] = 'id' . $name;
+		}
+		
+		if($label_after && isset($attrs['label'])) {
+			$this->html .= '<label>';
 		}
 		
 		$this->html .= '<' . $tag . ' name="' . $name . '"';
@@ -295,10 +318,8 @@ class SktInputView extends SktView {
 			$this->html .= '</' . $tag . '>';
 		}
 		
-		if($label_after) {
-			if(isset($attrs['label'])) {
-				$this->html .= ' <label for="' . $attrs['id'] . '">' . esc_html($attrs['label']) . '</label>';
-			}
+		if($label_after && isset($attrs['label'])) {
+			$this->html .= ' ' . esc_html($attrs['label']) . '</label>';
 		}
 	}
 }

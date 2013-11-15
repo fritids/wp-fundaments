@@ -5,9 +5,6 @@
 */
 
 abstract class SktSettingsPageBase extends SktFieldManager {
-	protected $plugin = '';
-	protected $fields = array();
-	
 	function __construct($plugin) {
 		$this->plugin = $plugin;
 		$basename = get_class($this);

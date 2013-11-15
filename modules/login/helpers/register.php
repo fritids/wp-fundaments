@@ -109,7 +109,11 @@ function skt_register_form_print() {
 	} ?>
 	
 	<form class="loginform" name="registerform" id="registerform" action="<?php echo site_url('wp-login.php?action=register', 'login_post') ?>" method="post">
-		<?php skt_signup_field('first_name',
+		<?php skt_open_signup_fieldset(
+			apply_filters('skt_signup_firldset1_title', _('About you'))
+		);
+		
+		skt_signup_field('first_name',
 			array(
 				'value' => isset($_POST['first_name']) ? $_POST['first_name'] : null,
 				'label' => 'First Name',
@@ -160,6 +164,7 @@ function skt_register_form_print() {
 			)
 		);
 		
+		skt_close_signup_fieldset('');
 		do_action('register_form'); ?>
 		<p id="reg_passmail"><?php do_action('skt_register_form_footer') ?></p>
 		<p class="submit">

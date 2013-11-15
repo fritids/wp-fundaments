@@ -5,8 +5,8 @@
 */
 
 abstract class SktFieldManager {
-	protected $plugin;
-	protected $basename;
+	public $plugin;
+	public $basename;
 	protected $fields = array();
 	
 	function __construct($plugin) {

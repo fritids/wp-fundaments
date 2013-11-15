@@ -217,13 +217,24 @@ abstract class SktProfile extends SktFieldManager {
 		$data = array();
 		
 		foreach($this->fieldnames() as $field) {
-			$data[$field] = $this->get_field($user_id, $field);
+			$attrs = $this->fieldattrs($field);
+			$data[$field] = $this->get_field($user_id, $field,
+				isset($attrs['default']) ? $attrs['default'] : null
+			);
 		}
 		
-		$this->user_registered($user_id, $data);
+		if(!is_admin()) {
+			$this->user_registered($user_id, $data);
+		} else {
+			$this->user_created($user_id, $data);
+		}
 	}
 	
 	protected function user_registered($user_id, $data) {
-		
+		// Runs when a user registers him or herself
+	}
+	
+	protected function user_created($user_id, $data) {
+		// Runs when a user is added via the admin site
 	}
 }

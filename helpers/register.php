@@ -29,4 +29,8 @@ function skt_register_theme() {
 	foreach(glob($path . '/mail/*.php') as $filename) {
 		$GLOBALS['skt_fundaments']->add_email_template($filename, 'plugin');
 	}
+	
+	if(is_file($path . '/functions.php')) {
+		require_once($path . '/functions.php');
+	}
 }

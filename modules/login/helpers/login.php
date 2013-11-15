@@ -60,7 +60,11 @@ function skt_login_form_print() {
 	} ?>
 	
 	<form class="loginform" action="<?php bloginfo('wpurl'); ?>/wp-login.php" method="post">
-		<?php skt_signup_field('log',
+		<?php skt_open_signup_fieldset(
+			apply_filters('skt_signup_firldset1_title', _('About you'))
+		);
+		
+		skt_signup_field('log',
 			array(
 				'label' => 'Username',
 				'value' => isset($_POST['log']) ? $_POST['log'] : null
@@ -72,14 +76,9 @@ function skt_login_form_print() {
 				'label' => 'Password',
 				'type' => 'password'
 			)
-		); ?>
+		);
 		
-		<p>
-			<label>
-				<input name="rememberme" class="checkbox" id="rememberme" value="forever" type="checkbox" checked="checked"/>
-				<?php _e('Remember me'); ?>
-			</label>
-		</p>
+		skt_close_signup_fieldset(); ?>
 		
 		<p class="submit">
 			<input type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Login'); ?>" />

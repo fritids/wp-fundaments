@@ -173,72 +173,75 @@ abstract class SktPostType extends SktFieldManager {
 	}
 	
 	public function register_meta_boxes() {
+		global $post;
+		
 		$fields = $this->fieldnames();
 		$handled_fields = array();
 		
 		if(isset($this->meta_boxes) && is_array($this->meta_boxes)) {
 			foreach($this->meta_boxes as $key => $box) {
-				$view = 'post_types/' . $this->basename . '/meta/' . (is_array($box) ? $key : $box);
-				$func = '$g = $GLOBALS[\'skt_fundaments\']; ';
-				$func .= '$p = $g->get_post_type("' . $this->plugin . '", "' . $this->basename . '"); ';
-				$func .= 'global $post; ';
-				$has_view = false;
-				
-				if($GLOBALS['skt_fundaments']->view_exists($this->plugin, $view)) {
-					$func .= '$g->view("' . $this->plugin . '", "' . $view . '", array("post" => $post, ';
-					
-					if(isset($this->fields)) {
-						foreach($fields as $i => $field) {
-							$func .= '"' . $field . '" => $p->get_field($post, "' . $field . '")';
-							if($i < count($fields) - 1) {
-								$func .= ', ';
+				$continue = true;
+				if(is_array($box) && isset($box['conditions'])) {
+					foreach($box['conditions'] as $k => $v) {
+						if(is_array($v)) {
+							if(!in_array($post->$k, $v)) {
+								$continue = false;
+								break;
 							}
-							
+						} elseif($post->$k != $v) {
+							$continue = false;
+							break;
+						}
+					}
+				}
+				
+				$has_view = false;
+				if($GLOBALS['skt_fundaments']->view_exists($this->plugin, $view)) {
+					if(isset($this->fields)) {
+						foreach($fields as $field) {
 							$handled_fields[] = $field;
 						}
 					}
 					
-					$func .= '));';
 					$has_view = true;
 				}
 				
-				if(is_array($box)) {
-					if(!$has_view) {
-						if(isset($box['fields']) && is_array($box['fields'])) {
-							foreach($box['fields'] as $field) {
-								switch($field) {
-									case '_parent':
-										$func .= 'echo $p->fieldlabel("' . $field . '") . "<br />"; $g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("type" => "post:' . $this->parent . '", "value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
-										break;
-									default:
-										if($this->fieldtype($field) != 'boolean') {
-											$func .= 'echo $p->fieldlabel("' . $field . '") . "<br />";';
-										}
-										
-										$func .= 'echo $g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
-								}
-								
-								$handled_fields[] = $field;
-							}
+				if(is_array($box) && !$has_view) {
+					if(isset($box['fields']) && is_array($box['fields'])) {
+						foreach($box['fields'] as $field) {
+							$handled_fields[] = $field;
 						}
 					}
-					
-					add_meta_box(
-						$this->basename . '_' . $key,
-						isset($box['title']) ? $box['title'] : skt_ucwords(str_replace('_', ' ', $key)),
-						create_function('', $func),
-						$this->basename,
-						isset($box['context']) ? $box['context'] : 'normal',
-						isset($box['priority']) ? $box['priority'] : 'core'
-					);
-				} else {
-					add_meta_box(
-						$this->basename . '_' . $box,
-						skt_ucwords(str_replace('_', ' ', $box)),
-						create_function('', $func),
-						$this->basename
-					);
 				}
+				
+				if(!$continue) {
+					continue;
+				}
+				
+				$view = 'post_types/' . $this->basename . '/meta/' . (is_array($box) ? $key : $box);
+				$func = '$g = $GLOBALS[\'skt_fundaments\']; ';
+				$func .= '$p = $g->get_post_type("' . $this->plugin . '", "' . $this->basename . '"); ';
+				$func .= 'global $post; ';
+				
+				add_meta_box(
+					$this->basename . '_' . is_array($box) ? $key : $box,
+					is_array($box) ? (
+						isset($box['title']) ? $box['title'] : skt_ucwords(str_replace('_', ' ', $key))
+					) : skt_ucwords(str_replace('_', ' ', $box)),
+					array(
+						new SktMetaBox($this, $view,
+							is_array($box) ? $box['fields'] : array(),
+							is_array($box) ? count($box['fields']) > 0 : false
+						), 'render'
+					),
+					$this->basename,
+					is_array($box) ? (
+						isset($box['context']) ? $box['context'] : 'normal'
+					) : 'normal',
+					is_array($box) ? (
+						isset($box['priority']) ? $box['priority'] : 'core'
+					) : 'core'
+				);
 			}
 		}
 		
@@ -247,27 +250,13 @@ abstract class SktPostType extends SktFieldManager {
 				continue;
 			}
 			
-			$attrs = $this->fieldattrs($field);
-			if(is_array($attrs) && isset($attrs['visible']) && !$attrs['visible']) {
-				return;
-			}
-			
-			$func = '$g = $GLOBALS[\'skt_fundaments\']; ';
-			$func .= '$p = $g->get_post_type("' . $this->plugin . '", "' . $this->basename . '"); ';
-			$func .= 'global $post; ';
-			
-			switch($field) {
-				case '_parent':
-					$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("type" => "post:' . $this->parent . '", "value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
-					break;
-				default:
-					$func .= '$g->input($p->fieldname("' . $field . '"), $p->fieldattrs("' . $field . '", array("value" => $p->get_field($post, "' . $field . '")))); print("<br />");';
-			}
-			
 			add_meta_box(
 				$this->basename . '_' . $field,
 				$this->fieldlabel($field),
-				create_function('', $func),
+				array(
+					new SktMetaBox($this, null, array($field), false),
+					'render'
+				),
 				$this->basename
 			);
 		}
