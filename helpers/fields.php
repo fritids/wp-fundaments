@@ -81,7 +81,27 @@ function skt_get_field($field, $post_id = null) {
 }
 
 function skt_the_field($field, $post_id = null) {
-	echo htmlentities(skt_get_field($field, $post_id));
+	if(!$post_id) {
+		$post_id = get_the_ID();
+	}
+	
+	$type = get_post_type($post_id);
+	$context = $GLOBALS['skt_fundaments'];
+	
+	if($handler = $context->find_post_type($type)) {
+		$type = $handler->fieldtype($field);
+		$value = $handler->get_field($post_id, $field);
+		
+		switch($type) {
+			case 'html':
+				echo apply_filters('the_content', $value);
+				break;
+			default:
+				echo htmlentities($value);
+		}
+	} else {
+		wp_die("Post type <code>$type</code> is not supported by the Fundaments plugin");
+	}
 }
 
 function skt_update_field($field, $value, $post_id = null) {
