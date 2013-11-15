@@ -69,6 +69,13 @@ abstract class SktPostType extends SktFieldManager {
 		}
 		
 		$this->basename = strtolower($new_basename);
+		
+		$types = array('post', 'page', 'attachment', 'revision', 'nav_menu_item');
+		if(in_array($this->basename, $types)) {
+			add_action('add_meta_boxes', array(&$this, 'register_meta_boxes'));
+			return;
+		}
+		
 		$args = array(
 			'label' => isset($this->label) ? $this->label : skt_ucwords($new_friendly_name),
 			'labels' => array(
@@ -119,7 +126,7 @@ abstract class SktPostType extends SktFieldManager {
 		}
 		
 		register_post_type($this->basename, $args);
-		flush_rewrite_rules();
+		// flush_rewrite_rules();
 	}
 	
 	public function get_field($post, $field, $default = null) {
