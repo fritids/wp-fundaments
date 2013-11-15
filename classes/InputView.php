@@ -18,6 +18,10 @@ class SktInputView extends SktView {
 			$this->html .= '<input type="hidden" name="' . esc_attr($name) . '"';
 			
 			if(isset($attrs['value'])) {
+				if(is_object($attrs['value'])) {
+					$attrs['value'] = $attrs['value']->ID;
+				}
+				
 				$this->html .= ' value="' . esc_attr($attrs['value']) . '"';
 			}
 			
