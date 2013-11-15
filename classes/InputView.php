@@ -121,7 +121,12 @@ class SktInputView extends SktView {
 		$self_closing = true;
 		$label_id = '';
 		$add_type = true;
+		$embed_value = false;
 		$label_after = false;
+		
+		if(!isset($attrs['id'])) {
+			$attrs['id'] = 'id' . $name;
+		}
 		
 		switch($type) {
 			case 'select':
@@ -129,6 +134,21 @@ class SktInputView extends SktView {
 				$self_closing = false;
 				$add_type = false;
 				break;
+			case 'textarea':
+				$tag = 'textarea';
+				$self_closing = false;
+				$add_type = false;
+				$embed_value = true;
+				break;
+			case 'html':
+				$this->html = '';
+				wp_editor(
+					isset($attrs['value']) ? $attrs['value'] : '',
+					$name,
+					array('media_buttons' => false)
+				);
+				
+				return;
 			case 'checkbox': case 'radio':
 				$label_after = true;
 				if(isset($attrs['choices'])) {
@@ -245,10 +265,6 @@ class SktInputView extends SktView {
 				}
 		}
 		
-		if(!isset($attrs['id'])) {
-			$attrs['id'] = 'id' . $name;
-		}
-		
 		if($label_after && isset($attrs['label'])) {
 			$this->html .= '<label>';
 		}
@@ -270,6 +286,10 @@ class SktInputView extends SktView {
 		foreach($attrs as $attr => $value) {
 			if($attr != 'type' && $attr != 'name' && $attr != 'label') {
 				if($type == 'select' && ($attr == 'value' || $attr == 'choices')) {
+					continue;
+				}
+				
+				if($embed_value) {
 					continue;
 				}
 				
@@ -313,6 +333,8 @@ class SktInputView extends SktView {
 					$this->html .= '</' . $tag . '>';
 					return;
 				}
+			} elseif($embed_value && isset($attrs['value'])) {
+				$this->html .= stripslashes($attrs['value']);
 			}
 			
 			$this->html .= '</' . $tag . '>';
