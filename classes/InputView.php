@@ -267,6 +267,63 @@ class SktInputView extends SktView {
 					$this->html .= '</ul>';
 					return;
 				}
+				
+				if(substr($type, 0, 9) == 'provider:') {
+					$provider_info = explode(':', substr($type, 9));
+					$provider_plugin = $provider_info[0];
+					$provider_type = $provider_info[1];
+					
+					if($provider_plugin == '_theme') {
+						$provider_plugin = basename(get_template_directory());
+					}
+					
+					if(isset($attrs['multiple'])) {
+						$multiple = $attrs['multiple'];
+						unset($attrs['multiple']);
+					} else {
+						$multiple = false;
+					}
+					
+					$value = isset($attrs['value']) ? $attrs['value'] : array();
+					if(!is_array($value) && $value) {
+						$value = array($value);
+					}
+					
+					if(isset($attrs['value'])) {
+						unset($attrs['value']);
+					}
+					
+					$vv = array();
+					foreach($value as $v) {
+						if(is_object($v) && isset($v->ID)) {
+							$vv[] = get_class($v);
+						} else {
+							$vv[] = (string)$v;
+						}
+					}
+					
+					$this->html .= '<ul';
+					if(isset($attrs['class'])) {
+						$this->html .= ' class="' . esc_attr($attrs['class']) . '"';
+					}
+					
+					$this->html .= '>';
+					foreach(skt_get_provider_choices($provider_plugin, $provider_type) as $t => $n) {
+						$this->html .= '<li>';
+						$this->html .= '<label><input type="' . ($multiple ? 'checkbox' : 'radio') . '" name="' . $name . '[]" ';
+						$this->html .= 'value="' . esc_attr($t) . '"';
+						
+						if(in_array($t, $vv)) {
+							$this->html .= ' checked';
+						}
+						
+						$this->html .= ' /> ' . esc_html($n) . '</label>';
+						$this->html .= '</li>';
+					}
+					
+					$this->html .= '</ul>';
+					return;
+				}
 		}
 		
 		if($label_after && isset($attrs['label'])) {

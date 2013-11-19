@@ -49,6 +49,8 @@ abstract class SktProfile extends SktFieldManager {
 		
 		add_action('register_form', array(&$this, 'register_form'));
 		add_filter('registration_errors', array(&$this, 'registration_errors'), 10, 3);
+		
+		add_filter('authenticate', array(&$this, 'authenticate'), 10, 3);
 	}
 	
 	public function get_field($user, $field, $default = null) {
@@ -236,5 +238,10 @@ abstract class SktProfile extends SktFieldManager {
 	
 	protected function user_created($user_id, $data) {
 		// Runs when a user is added via the admin site
+	}
+	
+	public function authenticate($user, $username, $password) {
+		// Adds custom authentication
+		return $use;
 	}
 }

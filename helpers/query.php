@@ -6,6 +6,9 @@
 
 function skt_query($post_type, $args = array()) {
 	$context = $GLOBALS['skt_fundaments'];
+	if(!$post_type) {
+		wp_die('No post type given');
+	}
 	
 	if($handler = $context->find_post_type($post_type)) {
 		query_posts(

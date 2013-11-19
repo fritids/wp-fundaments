@@ -147,10 +147,13 @@ abstract class SktFieldManager {
 						$v = isset($_POST[$fieldname]) ? $_POST[$fieldname] : null;
 						return is_array($v) ? $v[0] : $v;
 					}
-				} else {
-					print_r(is_array($v) ? $v[0] : $v);
+				} elseif(isset($attrs['multiple']) && $attrs['multiple']) {
 					return isset($_POST[$fieldname]) ? $_POST[$fieldname] : null;
+				} elseif(isset($_POST[$fieldname]) && is_array($_POST[$fieldname]) && count($_POST[$fieldname]) > 0) {
+					return $_POST[$fieldname][0];
 				}
+				
+				return isset($_POST[$fieldname]) ? $_POST[$fieldname] : null;
 		}
 	}
 }

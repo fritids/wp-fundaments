@@ -52,6 +52,10 @@ function skt_get_fieldname($field, $post_type = null) {
 		$post_type = get_post_type(get_the_ID());
 	}
 	
+	if(!$post_type) {
+		wp_die('Post type could not be determined by ID');
+	}
+	
 	$context = $GLOBALS['skt_fundaments'];
 	
 	if($handler = $context->find_post_type($post_type)) {
@@ -69,6 +73,11 @@ function skt_get_field($field, $post_id = null) {
 	}
 	
 	$type = get_post_type($post_id);
+	
+	if(!$type) {
+		wp_die('Post type could not be determined by ID');
+	}
+	
 	$context = $GLOBALS['skt_fundaments'];
 	
 	if($handler = $context->find_post_type($type)) {
@@ -86,6 +95,10 @@ function skt_the_field($field, $post_id = null) {
 	}
 	
 	$type = get_post_type($post_id);
+	if(!$type) {
+		wp_die('Post type could not be determined by ID');
+	}
+	
 	$context = $GLOBALS['skt_fundaments'];
 	
 	if($handler = $context->find_post_type($type)) {
@@ -110,6 +123,10 @@ function skt_update_field($field, $value, $post_id = null) {
 	}
 	
 	$type = get_post_type($post_id);
+	if(!$type) {
+		wp_die('Post type could not be determined by ID');
+	}
+	
 	$context = $GLOBALS['skt_fundaments'];
 	
 	if($handler = $context->find_post_type($type)) {

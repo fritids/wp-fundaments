@@ -34,7 +34,7 @@ class SktMetaBox extends SktView {
 							$this->post_type->fieldattrs($field,
 								array(
 									'type' => 'post:' . $this->post_type->parent,
-									"value" => $p->get_field($post, $field)
+									"value" => $this->post_type->get_field($post, $field)
 								)
 							)
 						);

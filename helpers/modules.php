@@ -47,6 +47,10 @@ function skt_load_module($name) {
 		wp_die("Module <code>$name</code> not found in plugin");
 	}
 	
+	foreach (glob($path . '/classes/*.php') as $filename) {
+		require_once($filename);
+	}
+		
 	$GLOBALS['skt_fundaments']->register($path);
 	if(is_file($path . '/functions.php')) {
 		require_once($path . '/functions.php');

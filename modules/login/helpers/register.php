@@ -1,20 +1,22 @@
 <?php function skt_register_new_user($user_login, $user_email, $user_pass, $confirm_pass, $first_name, $last_name) {
 	$errors = new WP_Error();
-	$sanitized_user_login = sanitize_user($user_login);
 	$user_email = apply_filters('user_registration_email', $user_email);
 	
-	if ($sanitized_user_login == '') {
-		$errors->add('empty_username', __('<strong>ERROR</strong>: Please enter a username.'));
-	} elseif (! validate_username($user_login)) {
-		$errors->add('invalid_username',
-			__('<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.')
-		);
+	if(!defined('SKT_USERNAME_AUTH') || SKT_USERNAME_AUTH) {
+		$sanitized_user_login = sanitize_user($user_login);
+		if ($sanitized_user_login == '') {
+			$errors->add('empty_username', __('<strong>ERROR</strong>: Please enter a username.'));
+		} elseif (!validate_username($user_login)) {
+			$errors->add('invalid_username',
+				__('<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.')
+			);
 		
-		$sanitized_user_login = '';
-	} elseif (username_exists($sanitized_user_login)) {
-		$errors->add('username_exists',
-			__('<strong>ERROR</strong>: This username is already registered. Please choose another one.')
-		);
+			$sanitized_user_login = '';
+		} elseif (username_exists($sanitized_user_login)) {
+			$errors->add('username_exists',
+				__('<strong>ERROR</strong>: This username is already registered. Please choose another one.')
+			);
+		}
 	}
 	
 	if ($user_email == '') {
@@ -24,6 +26,13 @@
 		$user_email = '';
 	} elseif (email_exists($user_email)) {
 		$errors->add('email_exists', __('<strong>ERROR</strong>: This email is already registered, please choose another one.'));
+	}
+	
+	if(defined('SKT_USERNAME_AUTH') && !SKT_USERNAME_AUTH) {
+		$sanitized_user_login = str_replace(
+			'@', '_',
+			str_replace('.', '_', $user_email)
+		);
 	}
 	
 	if ($user_pass == '') {
@@ -41,22 +50,23 @@
 		return $errors;
 	}
 	
-	$user_id = wp_create_user(
-		$sanitized_user_login,
-		$user_pass,
-		$user_email
+	$args = array(
+		'user_login' => $sanitized_user_login,
+		'user_email' => $user_email,
+		'user_pass' => $user_pass
 	);
+	
+	$args['default_password_nag'] = true;
+	$args['first_name'] = $first_name;
+	$args['last_name'] = $last_name;
+	$user_id = wp_insert_user($args);
 	
 	if (!$user_id) {
 		$errors->add('registerfail', sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you&hellip; please contact the <a href="mailto:%s">webmaster</a> !'), get_option('admin_email')));
 		return $errors;
 	}
 	
-	update_user_option($user_id, 'default_password_nag', true, true);
-	update_user_meta($user_id, 'first_name', $first_name);
-	update_user_meta($user_id, 'last_name', $last_name);
 	wp_new_user_notification($user_id, $user_pass);
-	
 	return $user_id;
 }
 
@@ -110,7 +120,7 @@ function skt_register_form_print() {
 	
 	<form class="loginform" name="registerform" id="registerform" action="<?php echo site_url('wp-login.php?action=register', 'login_post') ?>" method="post">
 		<?php skt_open_signup_fieldset(
-			apply_filters('skt_signup_firldset1_title', _('About you'))
+			apply_filters('skt_signup_fieldset1_title', _('About you'))
 		);
 		
 		skt_signup_field('first_name',
@@ -129,13 +139,15 @@ function skt_register_form_print() {
 			)
 		);
 		
-		skt_signup_field('user_login',
-			array(
-				'label' => 'Choose a Username',
-				'value' => isset($_POST['user_login']) ? $_POST['user_login'] : null,
-				'autocomplete' => 'off'
-			)
-		);
+		if(!defined('SKT_USERNAME_AUTH') || SKT_USERNAME_AUTH) {
+			skt_signup_field('user_login',
+				array(
+					'label' => 'Choose a Username',
+					'value' => isset($_POST['user_login']) ? $_POST['user_login'] : null,
+					'autocomplete' => 'off'
+				)
+			);
+		}
 		
 		skt_signup_field('user_email',
 			array(

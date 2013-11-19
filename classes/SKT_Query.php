@@ -2,6 +2,10 @@
 
 class SKT_Query extends WP_Query {
 	function __construct($post_type, $args = array()) {
+		if(!$post_type) {
+			wp_die('No post type given');
+		}
+		
 		$context = $GLOBALS['skt_fundaments'];
 		
 		if($handler = $context->find_post_type($post_type)) {

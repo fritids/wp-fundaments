@@ -7,6 +7,7 @@
 abstract class SktProviderBase {
 	protected $mappings = array();
 	protected $defaults = array();
+	public $name = '';
 	
 	function __construct($plugin) {
 		$this->plugin = $plugin;

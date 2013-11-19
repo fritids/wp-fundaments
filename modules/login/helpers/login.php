@@ -61,15 +61,25 @@ function skt_login_form_print() {
 	
 	<form class="loginform" action="<?php bloginfo('wpurl'); ?>/wp-login.php" method="post">
 		<?php skt_open_signup_fieldset(
-			apply_filters('skt_signup_firldset1_title', _('About you'))
+			apply_filters('skt_signup_fieldset1_title', '')
 		);
 		
-		skt_signup_field('log',
-			array(
-				'label' => 'Username',
-				'value' => isset($_POST['log']) ? $_POST['log'] : null
-			)
-		);
+		if(!defined('SKT_USERNAME_AUTH') || SKT_USERNAME_AUTH) {
+			skt_signup_field('log',
+				array(
+					'label' => 'Username',
+					'value' => isset($_POST['log']) ? $_POST['log'] : null
+				)
+			);
+		} else {
+			skt_signup_field('log',
+				array(
+					'label' => 'Email address',
+					'type' => 'email',
+					'value' => isset($_POST['log']) ? $_POST['log'] : null
+				)
+			);
+		}
 		
 		skt_signup_field('pwd',
 			array(
@@ -86,3 +96,18 @@ function skt_login_form_print() {
 		</p>
 	</form>
 <?php }
+
+add_action('wp_authenticate', 'skt_authenticate_email');
+function skt_authenticate_email($username) {
+	if(defined('SKT_USERNAME_AUTH') && !SKT_USERNAME_AUTH) {
+		if(empty($_GET['interim-login']) || $_GET['interim-login'] != '1') {
+			$user = get_user_by_email($username);
+			
+			if(!empty($user->user_login)) {
+				$username = $user->user_login;
+			}
+		}
+	}
+	
+	return $username;
+}

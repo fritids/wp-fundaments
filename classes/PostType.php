@@ -38,6 +38,7 @@ abstract class SktPostType extends SktFieldManager {
 		add_action('save_post', array(&$this, 'save_post'));
 		add_filter('post_type_link', array(&$this, 'permalinks'), 10, 3);
 		add_action('pre_get_posts', array(&$this, 'pre_get_posts'));
+		add_action('admin_menu', array(&$this, 'admin_menu'));
 	}
 	
 	private function register_post_type() {
@@ -127,6 +128,13 @@ abstract class SktPostType extends SktFieldManager {
 		
 		register_post_type($this->basename, $args);
 		// flush_rewrite_rules();
+	}
+	
+	public function admin_menu() {
+		if(isset($this->can_add) && !$this->can_add) {
+			global $submenu;
+			unset($submenu['edit.php?post_type=' . $this->basename][10]);
+		}
 	}
 	
 	public function get_field($post, $field, $default = null) {
