@@ -73,7 +73,6 @@ function skt_get_field($field, $post_id = null) {
 	}
 	
 	$type = get_post_type($post_id);
-	
 	if(!$type) {
 		wp_die('Post type could not be determined by ID');
 	}
@@ -85,8 +84,6 @@ function skt_get_field($field, $post_id = null) {
 	} else {
 		wp_die("Post type <code>$type</code> is not supported by the Fundaments plugin");
 	}
-	
-	return null;
 }
 
 function skt_the_field($field, $post_id = null) {

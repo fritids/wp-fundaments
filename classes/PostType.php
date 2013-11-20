@@ -39,6 +39,7 @@ abstract class SktPostType extends SktFieldManager {
 		add_filter('post_type_link', array(&$this, 'permalinks'), 10, 3);
 		add_action('pre_get_posts', array(&$this, 'pre_get_posts'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
+		add_filter('skt_formfield_attrs_by_name', array(&$this, 'formfield_attrs'), 10, 2);
 	}
 	
 	private function register_post_type() {
@@ -137,9 +138,9 @@ abstract class SktPostType extends SktFieldManager {
 		}
 	}
 	
-	public function get_field($post, $field, $default = null) {
+	public function get_field($obj, $field, $default = null) {
 		if($field == '_parent') {
-			$ancestors = get_post_ancestors(is_object($post) ? $post->ID : $post);
+			$ancestors = get_post_ancestors(is_object($obj) ? $obj->ID : $obj);
 			if(is_array($ancestors) && count($ancestors) > 0) {
 				return get_post($ancestors[0]);
 			}
@@ -155,29 +156,29 @@ abstract class SktPostType extends SktFieldManager {
 		}
 		
 		$value = skt_unserialise_field_value(
-			get_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field), true),
+			get_post_meta(is_object($obj) ? $obj->ID : $obj, $this->fieldname($field), true),
 			$this->fieldtype($field)
 		);
 		
 		return $value ? $value : $default;
 	}
 	
-	public function set_field($post, $field, $value) {
+	public function set_field($obj, $field, $value) {
 		$type = $this->fieldtype($field);
 		if($field == '_parent') {
 			wp_update_post(
 				array(
-					'ID' => is_object($post) ? $post->ID : $post,
+					'ID' => is_object($obj) ? $obj->ID : $obj,
 					'post_parent' => is_object($value) ? $value->ID : $value
 				)
 			);
 		} else {
-			update_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field), $value);
+			update_post_meta(is_object($obj) ? $obj->ID : $obj, $this->fieldname($field), $value);
 		}
 	}
 	
-	public function delete_field($post, $field) {
-		delete_post_meta(is_object($post) ? $post->ID : $post, $this->fieldname($field));
+	public function delete_field($obj, $field) {
+		delete_post_meta(is_object($obj) ? $obj->ID : $obj, $this->fieldname($field));
 	}
 	
 	public function register_meta_boxes() {
@@ -487,5 +488,24 @@ abstract class SktPostType extends SktFieldManager {
 				$query->set('order', 'ASC');
 			}
 		}
+	}
+	
+	public function formfield_attrs($attrs, $name) {
+		if(strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php')) {
+			foreach($this->fieldnames() as $field) {
+				$fullname = $this->fieldname($field);
+				if($name == $fullname) {
+					if(method_exists($this, "get_${field}_attrs")) {
+						$new_attrs = call_user_func_array(
+							array($this, "get_${field}_attrs")
+						);
+						
+						return array_merge($attrs, $new_attrs);
+					}
+				}
+			}
+		}
+		
+		return $attrs;
 	}
 }

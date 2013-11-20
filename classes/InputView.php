@@ -11,6 +11,7 @@ class SktInputView extends SktView {
 		}
 		
 		$attrs = apply_filters('skt_formfield_attrs', $attrs);
+		$attrs = apply_filters('skt_formfield_attrs_by_name', $attrs, $name);
 		$type = isset($attrs['type']) ? $attrs['type'] : 'text';
 		
 		if($type == 'media') {
@@ -59,6 +60,7 @@ class SktInputView extends SktView {
 			
 			$this->html .= '<div class="skt-date-handler">';
 			$this->html .= '<select id="' . $id . '_day" name="' . $name . '_day" class="skt-date-day">';
+			
 			for($i = 1; $i <= 31; $i ++) {
 				$this->html .= '<option value="' . $i . '"';
 				
@@ -247,24 +249,23 @@ class SktInputView extends SktView {
 						)
 					);
 					
-					$this->html .= '<ul';
-					if(isset($attrs['class'])) {
-						$this->html .= ' class="' . esc_attr($attrs['class']) . '"';
+					$this->html .= '<select id="' . $id . '" name="' . $name . '"';
+					if(isset($attrs['multiple']) && $attrs['multiple']) {
+						$this->html .= ' multiple';
 					}
 					
-					$this->html .= '>';
+					$this->html .= '><option value="">---------</option>';
 					foreach($posts as $i => $p) {
-						$this->html .= '<li>';
-						$this->html .= '<label><input type="' . ($multiple ? 'checkbox' : 'radio') . '" name="' . $name . '[]" value="' . esc_attr($p->ID) . '"';
+						$this->html .= '<option value="' . $p->ID . '"';
+						
 						if(in_array($p->ID, $vv)) {
-							$this->html .= ' checked';
+							$this->html .= ' selected';
 						}
 						
-						$this->html .= ' /> ' . esc_html($p->post_title) . '</label>';
-						$this->html .= '</li>';
+						$this->html .= '>' . htmlentities($p->post_title) . '</option>';
 					}
 					
-					$this->html .= '</ul>';
+					$this->html .= '</select>';
 					return;
 				}
 				
@@ -382,6 +383,7 @@ class SktInputView extends SktView {
 					}
 					
 					$attrs['value'] = $nv;
+					$this->html .= '<option value="">---------</option>';
 					foreach($attrs['choices'] as $key => $value) {
 						$this->html .= '<option value="' . esc_attr($key) . '"';
 						if($attrs['value'] && in_array((string)$key, $attrs['value'])) {
