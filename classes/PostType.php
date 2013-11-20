@@ -259,6 +259,11 @@ abstract class SktPostType extends SktFieldManager {
 				continue;
 			}
 			
+			$attrs = $this->fieldattrs($field);
+			if(isset($attrs['visible']) && !$attrs['visible']) {
+				continue;
+			}
+			
 			add_meta_box(
 				$this->basename . '_' . $field,
 				$this->fieldlabel($field),
