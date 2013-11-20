@@ -5,7 +5,7 @@
  */
 
 function skt_ucwords($words) {
-	$littlens = array('a', 'for', 'in', 'it', 'on', 'the', 'to');
+	$littlens = array('a', 'and', 'for', 'in', 'it', 'on', 'the', 'to');
 	$words = explode(' ', $words);
 	$return = array();
 	
