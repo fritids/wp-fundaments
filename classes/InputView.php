@@ -232,11 +232,13 @@ class SktInputView extends SktView {
 					}
 					
 					$vv = array();
-					foreach($value as $v) {
-						if(is_object($v) && isset($v->ID)) {
-							$vv[] = intVal($v->ID);
-						} else {
-							$vv[] = intVal($v);
+					if(is_array($value)) {
+						foreach($value as $v) {
+							if(is_object($v) && isset($v->ID)) {
+								$vv[] = intVal($v->ID);
+							} else {
+								$vv[] = intVal($v);
+							}
 						}
 					}
 					
