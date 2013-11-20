@@ -60,17 +60,21 @@ function skt_profile_form_print() {
 		
 		<?php do_action('skt_open_profile_fieldset', 'About You');
 		
-		do_action('skt_profile_field', 'user_login',
-			array(
-				'label' => 'Username',
-				'value' => isset($_POST['user_login']) ? $_POST['user_login'] : $profileuser->user_login,
-				'autocomplete' => 'off',
-				'disabled' => 'disabled',
-				'readonly' => 'readonly'
-			)
-		);
+		if(!defined('SKT_USERNAME_AUTH') || SKT_USERNAME_AUTH) {
+			skt_profile_field('user_login',
+				array(
+					'label' => 'Username',
+					'value' => isset($_POST['user_login']) ? $_POST['user_login'] : $profileuser->user_login,
+					'autocomplete' => 'off',
+					'disabled' => 'disabled',
+					'readonly' => 'readonly'
+				)
+			);
+		} else { ?>
+			<input name="user_login" type="hidden" value="<?php echo $profileuser->user_login; ?>" />
+		<?php }
 		
-		do_action('skt_profile_field', 'first_name',
+		skt_profile_field('first_name',
 			array(
 				'label' => 'First Name',
 				'value' => isset($_POST['first_name']) ? $_POST['first_name'] : $profileuser->first_name,
@@ -78,7 +82,7 @@ function skt_profile_form_print() {
 			)
 		);
 		
-		do_action('skt_profile_field', 'last_name',
+		skt_profile_field('last_name',
 			array(
 				'label' => 'Last Name',
 				'value' => isset($_POST['last_name']) ? $_POST['last_name'] : $profileuser->last_name,
@@ -86,7 +90,7 @@ function skt_profile_form_print() {
 			)
 		);
 		
-		do_action('skt_profile_field', 'email',
+		skt_profile_field('email',
 			array(
 				'label' => 'Email Address',
 				'type' => 'email',
@@ -99,7 +103,7 @@ function skt_profile_form_print() {
 		
 		if (apply_filters('show_password_fields', true)) {
 			do_action('skt_open_profile_fieldset', 'Your Password');
-			do_action('skt_profile_field', 'pass1',
+			skt_profile_field('pass1',
 				array(
 					'label' => 'Change Password',
 					'type' => 'password',
@@ -108,7 +112,7 @@ function skt_profile_form_print() {
 				)
 			);
 			
-			do_action('skt_profile_field', 'pass2',
+			skt_profile_field('pass2',
 				array(
 					'label' => 'Confirm New Password',
 					'type' => 'password',

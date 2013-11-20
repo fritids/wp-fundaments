@@ -100,6 +100,12 @@ abstract class SktProfile extends SktFieldManager {
 						continue;
 					}
 					
+					if($user->ID) {
+						if(isset($attrs['edit']) && $attrs['edit'] == false) {
+							continue;
+						}
+					}
+					
 					if(!isset($attrs['label'])) {
 						$attrs['label'] = $this->fieldlabel($key);
 					}
@@ -147,6 +153,14 @@ abstract class SktProfile extends SktFieldManager {
 	
 	public function save_form_fields($user_id) {
 		foreach($this->fieldnames() as $field) {
+			$attrs = $this->fieldattrs($field);
+			
+			if($user->ID) {
+				if(isset($attrs['edit']) && $attrs['edit'] == false) {
+					continue;
+				}
+			}
+			
 			if($value = $this->POST($field)) {
 				$this->set_field($user_id, $field, $value);
 			} else {
