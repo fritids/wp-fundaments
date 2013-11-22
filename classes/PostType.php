@@ -78,18 +78,24 @@ abstract class SktPostType extends SktFieldManager {
 			return;
 		}
 		
+		$singular = isset($this->singular) ? $this->singular : $new_friendly_name;
+		$uSingular = skt_ucwords($singular);
+		
+		$plural = isset($this->plural) ? $this->plural : $singular . 's';
+		$uPlural = skt_ucwords($plural);
+		
 		$args = array(
-			'label' => isset($this->label) ? $this->label : skt_ucwords($new_friendly_name),
+			'label' => isset($this->label) ? $this->label : $uPlural,
 			'labels' => array(
-				'name' => isset($this->name) ? $this->name : skt_ucwords($new_friendly_name . 's'),
-				'singular_name' => isset($this->singular_name) ? $this->singular_name : skt_ucwords($new_friendly_name),
-				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : ('Add New ' . skt_ucwords($new_friendly_name)),
-				'edit_item' => isset($this->edit_item) ? $this->edit_item : ('Edit ' . skt_ucwords($new_friendly_name)),
-				'new_item' => isset($this->new_item) ? $this->new_item : ('New ' . skt_ucwords($new_friendly_name)),
-				'view_item' => isset($this->view_item) ? $this->view_item : ('View ' . skt_ucwords($new_friendly_name)),
-				'search_items' => isset($this->search_items) ? $this->search_items : ('Search ' . skt_ucwords($new_friendly_name) . 's'),
-				'not_found' => isset($this->not_found) ? $this->not_found : ('No ' . $new_friendly_name . 's found'),
-				'not_found_in_trash' => isset($this->not_found_in_trash) ? $this->not_found_in_trash : ('No ' . $new_friendly_name . 's found in trash')
+				'name' => isset($this->name) ? $this->name : $uPlural,
+				'singular_name' => $singular,
+				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : "Add New $uSingular",
+				'edit_item' => isset($this->edit_item) ? $this->edit_item : "Edit $uSingular",
+				'new_item' => isset($this->new_item) ? $this->new_item : "New $uSingular",
+				'view_item' => isset($this->view_item) ? $this->view_item : "View $uSingular",
+				'search_items' => isset($this->search_items) ? $this->search_items : "Search $uPlural",
+				'not_found' => isset($this->not_found) ? $this->not_found : "No $plural found",
+				'not_found_in_trash' => isset($this->not_found_in_trash) ? $this->not_found_in_trash : "No $plural found in trash"
 			),
 			'description' => isset($this->description) ? $this->description : 'Custom post type',
 			'public' => isset($this->public) ? $this->public : true,

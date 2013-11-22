@@ -5,7 +5,7 @@
 */
 
 abstract class SktTaxonomy extends SktFieldManager {
-	public $post_type = 'post';
+	protected $post_type = 'post';
 	
 	function __construct($plugin) {
 		$this->plugin = $plugin;
@@ -45,25 +45,31 @@ abstract class SktTaxonomy extends SktFieldManager {
 		}
 		
 		$this->basename = strtolower($new_basename);
+		$singular = isset($this->singular) ? $this->singular : $new_friendly_name;
+		$uSingular = skt_ucwords($singular);
+		
+		$plural = isset($this->plural) ? $this->plural : $singular . 's';
+		$uPlural = skt_ucwords($plural);
+		
 		$args = array(
-			'label' => isset($this->label) ? $this->label : skt_ucwords($new_friendly_name),
+			'label' => isset($this->label) ? $this->label : $uPlural,
 			'labels' => array(
-				'name' => isset($this->name) ? $this->name : skt_ucwords($new_friendly_name . 's'),
-				'singular_name' => isset($this->singular_name) ? $this->singular_name : skt_ucwords($new_friendly_name),
-				'menu_name' => isset($this->menu_name) ? $this->menu_name : skt_ucwords($new_friendly_name . 's'),
-				'all_items' => isset($this->all_items) ? $this->all_items : ('All ' . skt_ucwords($new_friendly_name . 's')),
-				'edit_item' => isset($this->edit_item) ? $this->edit_item : ('Edit ' . skt_ucwords($new_friendly_name)),
-				'view_item' => isset($this->view_item) ? $this->view_item : ('View ' . skt_ucwords($new_friendly_name)),
-				'update_item' => isset($this->update_item) ? $this->update_item : ('Update ' . skt_ucwords($new_friendly_name)),
-				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : ('Add New ' . skt_ucwords($new_friendly_name)),
-				'new_item_name' => isset($this->new_item_name) ? $this->new_item_name : ('New ' . skt_ucwords($new_friendly_name) . ' Name'),
-				'parent_item' => isset($this->parent_item) ? $this->parent_item : ('Parent ' . skt_ucwords($new_friendly_name)),
-				'search_items' => isset($this->search_items) ? $this->search_items : ('Search ' . skt_ucwords($new_friendly_name) . 's'),
-				'popular_items' => isset($this->popular_items) ? $this->popular_items : ('Popular ' . skt_ucwords($new_friendly_name) . 's'),
-				'separate_items_with_commas' => isset($this->separate_items_with_commas) ? $this->separate_items_with_commas : ('Separate ' . $new_friendly_name . 's with commas'),
-				'add_or_remove_items' => isset($this->add_or_remove_items) ? $this->add_or_remove_items : ('Add or remove ' . $new_friendly_name . 's'),
-				'choose_from_most_used' => isset($this->choose_from_most_used) ? $this->choose_from_most_used : ('AddChoose from the most used ' . $new_friendly_name . 's'),
-				'not_found' => isset($this->not_found) ? $this->not_found : ('No ' . $new_friendly_name . 's found')
+				'name' => isset($this->name) ? $this->name : $uPlural,
+				'singular_name' => $uSingular,
+				'menu_name' => isset($this->menu_name) ? $this->menu_name : $uPlural,
+				'all_items' => isset($this->all_items) ? $this->all_items : "All $uPlural",
+				'edit_item' => isset($this->edit_item) ? $this->edit_item : "Edit $uSingular",
+				'view_item' => isset($this->view_item) ? $this->view_item : "View $uSingular",
+				'update_item' => isset($this->update_item) ? $this->update_item : "Update $uSingular",
+				'add_new_item' => isset($this->add_new_item) ? $this->add_new_item : "Add New $uSingular",
+				'new_item_name' => isset($this->new_item_name) ? $this->new_item_name : "New $singular name",
+				'parent_item' => isset($this->parent_item) ? $this->parent_item : "Parent $uSingular",
+				'search_items' => isset($this->search_items) ? $this->search_items : "Search $uPlural",
+				'popular_items' => isset($this->popular_items) ? $this->popular_items : "Popular $uPlural",
+				'separate_items_with_commas' => isset($this->separate_items_with_commas) ? $this->separate_items_with_commas : "Separate $plural with commas",
+				'add_or_remove_items' => isset($this->add_or_remove_items) ? $this->add_or_remove_items : "Add or remove $plural",
+				'choose_from_most_used' => isset($this->choose_from_most_used) ? $this->choose_from_most_used : "Choose from the most used $plural",
+				'not_found' => isset($this->not_found) ? $this->not_found : "No $plural found"
 			),
 			'public' => isset($this->public) ? $this->public : true,
 			'show_ui' => isset($this->show_ui) ? $this->show_ui : true,
