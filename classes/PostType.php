@@ -253,7 +253,7 @@ abstract class SktPostType extends SktCapable {
 				if(is_array($box) && isset($box['capabilities'])) {
 					foreach($box['capabilities'] as $capability) {
 						if(!current_user_can($capability)) {
-							return false;
+							$continue = false;
 						}
 					}
 				}
@@ -275,6 +275,19 @@ abstract class SktPostType extends SktCapable {
 				$func .= '$p = $g->get_post_type("' . $this->plugin . '", "' . $this->basename . '"); ';
 				$func .= 'global $post; ';
 				
+				$usable_fields = array();
+				if(is_array($box) && isset($box['fields'])) {
+					foreach($box['fields'] as $field) {
+						if($this->fieldeditable($field)) {
+							$usable_fields[] = $field;
+						}
+					}
+				}
+				
+				if(!count($usable_fields)) {
+					continue;
+				}
+				
 				add_meta_box(
 					$this->basename . '_' . (is_array($box) ? $key : $box),
 					is_array($box) ? (
@@ -282,8 +295,8 @@ abstract class SktPostType extends SktCapable {
 					) : skt_ucwords(str_replace('_', ' ', $box)),
 					array(
 						new SktMetaBox($this, $view,
-							is_array($box) ? $box['fields'] : array(),
-							is_array($box) ? count($box['fields']) > 0 : false
+							$usable_fields,
+							count($usable_fields) > 0
 						), 'render'
 					),
 					$this->basename,
@@ -299,6 +312,10 @@ abstract class SktPostType extends SktCapable {
 		
 		foreach($fields as $field) {
 			if(in_array($field, $handled_fields)) {
+				continue;
+			}
+			
+			if(!$this->fieldeditable($field)) {
 				continue;
 			}
 			

@@ -39,6 +39,12 @@ class SktInputView extends SktView {
 			return;
 		}
 		
+		if(!isset($attrs['id'])) {
+			$id = 'id' . $name;
+		} else {
+			$id = $attrs['id'];
+		}
+		
 		if($type == 'date' || $type == 'datetime') {
 			$now = mktime(date('H'), date('i'), 0);
 			$now_year = intVal(date('Y', $now));
@@ -47,12 +53,6 @@ class SktInputView extends SktView {
 			$month = intVal(date('m', $date));
 			$day = intVal(date('j', $date));
 			$time = date('H:i:s', $date);
-			
-			if(!isset($attrs['id'])) {
-				$id = 'id' . $name;
-			} else {
-				$id = $attrs['id'];
-			}
 			
 			if(substr($time, strlen($time) - 3) == ':00') {
 				$time = substr($time, 0, strlen($time) - 3);
@@ -252,11 +252,12 @@ class SktInputView extends SktView {
 					);
 					
 					$this->html .= '<select id="' . $id . '" name="' . $name . '"';
-					if(isset($attrs['multiple']) && $attrs['multiple']) {
-						$this->html .= ' multiple';
+					if($multiple) {
+						$this->html .= ' multiple>';
+					} else {
+						$this->html .= '><option value="">---------</option>';
 					}
 					
-					$this->html .= '><option value="">---------</option>';
 					foreach($posts as $i => $p) {
 						$this->html .= '<option value="' . $p->ID . '"';
 						
