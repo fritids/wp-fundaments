@@ -7,7 +7,7 @@ if(is_file(get_template_directory(). '/wp-profile.php')) {
 	
 	add_action('wp_head', 'skt_profile_head', 5);
 	function skt_profile_head() {
-		if(!current_user_can('administrator')) { ?>
+		if(!current_user_can('edit_posts')) { ?>
 			<style>#wpadminbar { display: none !important; }</style>
 		<?php }
 	}
@@ -23,7 +23,7 @@ if(is_file(get_template_directory(). '/wp-profile.php')) {
 	
 	function skt_profile_admin_init() {
 		global $pagenow;
-		if(!current_user_can('administrator') && $pagenow != 'profile.php') {
+		if(!current_user_can('edit_posts') && $pagenow != 'profile.php') {
 			global $wp_query;
 			$wp_query->is_404 = true;
 			get_template_part('404');

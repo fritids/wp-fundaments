@@ -32,7 +32,7 @@ if ($pagenow == "wp-login.php" && $_GET['action'] != 'logout' && !isset($_GET['k
 }
 
 function skt_fundaments_init() {
-	if(!current_user_can('administrator')) {
+	if(!current_user_can('edit_posts')) {
 		add_filter('show_admin_bar', '__return_false');
 	}
 	
