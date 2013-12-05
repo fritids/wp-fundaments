@@ -32,6 +32,10 @@ if ($pagenow == "wp-login.php" && $_GET['action'] != 'logout' && !isset($_GET['k
 }
 
 function skt_fundaments_init() {
+	if(!current_user_can('administrator')) {
+		add_filter('show_admin_bar', '__return_false');
+	}
+	
 	wp_register_style('skt-fieldsets', WP_PLUGIN_URL . '/skt-fundaments/css/fieldsets.css');
 	wp_register_script('skt-media-uploader', WP_PLUGIN_URL . '/skt-fundaments/js/media-uploader.js',
 		array('jquery')
