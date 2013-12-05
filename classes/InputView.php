@@ -348,7 +348,7 @@ class SktInputView extends SktView {
 		}
 		
 		foreach($attrs as $attr => $value) {
-			if($attr != 'type' && $attr != 'name' && $attr != 'label') {
+			if($attr != 'type' && $attr != 'name' && $attr != 'label' && $attr != 'capabilities') {
 				if($type == 'select' && ($attr == 'value' || $attr == 'choices')) {
 					continue;
 				}

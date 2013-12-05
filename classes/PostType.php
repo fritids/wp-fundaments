@@ -4,8 +4,9 @@
  * @package wp-fundaments
  */
 
-abstract class SktPostType extends SktFieldManager {
+abstract class SktPostType extends SktCapable {
 	protected $supports = array('title', 'slug', 'editor', 'thumbnail');
+	protected $roles = array('administrator', 'editor');
 	
 	function __construct($plugin) {
 		if(isset($this->rewrite) && is_string($this->rewrite)) {
@@ -39,7 +40,38 @@ abstract class SktPostType extends SktFieldManager {
 		add_filter('post_type_link', array(&$this, 'permalinks'), 10, 3);
 		add_action('pre_get_posts', array(&$this, 'pre_get_posts'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
+		add_action('admin_init', array(&$this, 'register_capabilities'));
 		add_filter('skt_formfield_attrs_by_name', array(&$this, 'formfield_attrs'), 10, 2);
+	}
+	
+	protected function capabilities() {
+		return array(
+			'publish_posts' => 'publish_' . $this->basename . 's',
+			'edit_posts' => 'edit_' . $this->basename . 's',
+			'edit_others_posts' => 'edit_others_' . $this->basename . 's',
+			'delete_posts' => 'delete_' . $this->basename . 's',
+			'delete_others_posts' => 'delete_others_' . $this->basename . 's',
+			'read_private_posts' => 'read_private_' . $this->basename . 's',
+			'edit_post' => 'edit_' . $this->basename,
+			'delete_post' => 'delete_' . $this->basename,
+			'read_post' => 'read_' . $this->basename
+		);
+	}
+	
+	public function fieldeditable($name) {
+		foreach($this->meta_boxes as $key => $box) {
+			if(is_array($box) && isset($box['fields']) && isset($box['capabilities'])) {
+				if(in_array($name, $box['fields'])) {
+					foreach($box['capabilities'] as $capability) {
+						if(!current_user_can($capability)) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+		
+		return parent::fieldeditable($name);
 	}
 	
 	private function register_post_type() {
@@ -101,8 +133,9 @@ abstract class SktPostType extends SktFieldManager {
 			'public' => isset($this->public) ? $this->public : true,
 			'show_ui' => isset($this->show_ui) ? $this->show_ui : true,
 			'menu_position' => isset($this->menu_position) ? $this->menu_position : SKT_DEFAULT_MENU_POSITION,
-			'capability_type' => isset($this->capability_type) ? $this->capability_type : SKT_DEFAULT_CAPABILITY_TYPE,
 			'supports' => $this->supports,
+			'capabilities' => $this->capabilities(),
+			'map_meta_cap' => true,
 			'hierarchical' => isset($this->hierarchical) ? $this->hierarchical : SKT_DEFAULT_HIERARCHICAL,
 			'register_meta_box_cb' => array(&$this, 'register_meta_boxes')
 		);
@@ -127,10 +160,6 @@ abstract class SktPostType extends SktFieldManager {
 		
 		if(isset($this->parent)) {
 			$args['show_in_menu'] = 'edit.php?post_type=' . $this->parent;
-		}
-		
-		if(isset($this->capabilities)) {
-			$args['capabilities'] = $thiscapabilities;
 		}
 		
 		register_post_type($this->basename, $args);
@@ -221,6 +250,14 @@ abstract class SktPostType extends SktFieldManager {
 					$has_view = true;
 				}
 				
+				if(is_array($box) && isset($box['capabilities'])) {
+					foreach($box['capabilities'] as $capability) {
+						if(!current_user_can($capability)) {
+							return false;
+						}
+					}
+				}
+				
 				if(is_array($box) && !$has_view) {
 					if(isset($box['fields']) && is_array($box['fields'])) {
 						foreach($box['fields'] as $field) {
@@ -303,6 +340,10 @@ abstract class SktPostType extends SktFieldManager {
 		
 		remove_action('save_post', array(&$this, 'save_post'));
 		foreach($this->fieldnames() as $field) {
+			if(!$this->fieldeditable($field)) {
+				continue;
+			}
+			
 			$fieldname = $this->fieldname($field);
 			$value = $this->POST($field);
 			

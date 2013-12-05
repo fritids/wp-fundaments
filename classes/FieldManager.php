@@ -92,6 +92,20 @@ abstract class SktFieldManager {
 		return $fields;
 	}
 	
+	public function fieldeditable($name) {
+		$attrs = $this->fieldattrs($name);
+		
+		if(isset($attrs['capabilities'])) {
+			foreach($attrs['capabilities'] as $capability) {
+				if(!current_user_can($capability)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	protected function POST($field) {
 		$attrs = $this->fieldattrs($field);
 		$fieldname = $this->fieldname($field);

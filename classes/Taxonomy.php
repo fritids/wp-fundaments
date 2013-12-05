@@ -4,16 +4,28 @@
 * @package wp-fundaments
 */
 
-abstract class SktTaxonomy extends SktFieldManager {
+abstract class SktTaxonomy extends SktCapable {
 	protected $post_type = 'post';
+	protected $roles = array('administrator', 'editor');
 	
 	function __construct($plugin) {
 		$this->plugin = $plugin;
 		$this->register_taxonomy();
+		$this->stubborn_capabilities[] = 'edit_' . $this->post_type . 's';
 		add_action($this->basename . '_add_form_fields', array(&$this, 'add_form_fields'));
 		add_action($this->basename . '_edit_form_fields', array(&$this, 'edit_form_fields'));
 		add_action('edited_' . $this->basename, array(&$this, 'save_form_fields'));  
 		add_action('create_' . $this->basename, array(&$this, 'save_form_fields'));
+		add_action('admin_init', array(&$this, 'register_capabilities'));
+	}
+	
+	protected function capabilities() {
+		return array(
+			'manage_terms' => 'manage_' . $this->basename . 's',
+			'edit_terms' => 'manage_' . $this->basename . 's',
+			'delete_terms' => 'manage_' . $this->basename . 's',
+			'assign_terms' => 'edit_' . $this->post_type . 's'
+		);
 	}
 	
 	private function register_taxonomy() {
@@ -74,7 +86,8 @@ abstract class SktTaxonomy extends SktFieldManager {
 			'public' => isset($this->public) ? $this->public : true,
 			'show_ui' => isset($this->show_ui) ? $this->show_ui : true,
 			'show_admin_column' => isset($this->show_admin_column) ? $this->show_admin_column : true,
-			'hierarchical' => isset($this->hierarchical) ? $this->hierarchical : true
+			'hierarchical' => isset($this->hierarchical) ? $this->hierarchical : true,
+			'capabilities' => $this->capabilities()
 		);
 		
 		if(isset($this->parent_item_colon)) {
@@ -95,10 +108,6 @@ abstract class SktTaxonomy extends SktFieldManager {
 			$args['show_tagcloud'] = $args['show_ui'];
 		}
 		
-		if(isset($this->capabilities)) {
-			$args['capabilities'] = $thiscapabilities;
-		}
-		
 		if(isset($this->sort)) {
 			$args['sort'] = $this->sort;
 		}
@@ -114,6 +123,10 @@ abstract class SktTaxonomy extends SktFieldManager {
 			} else {
 				$key = $opts;
 				$attrs = array();
+			}
+			
+			if(!$this->fieldeditable($key)) {
+				continue;
 			}
 			
 			$fname = $this->fieldname($key);
@@ -167,6 +180,10 @@ abstract class SktTaxonomy extends SktFieldManager {
 				$attrs = array();
 			}
 			
+			if(!$this->fieldeditable($key)) {
+				continue;
+			}
+			
 			$type = $this->fieldtype($key); ?>
 			
 			<tr class="form-field">
@@ -186,6 +203,10 @@ abstract class SktTaxonomy extends SktFieldManager {
 	
 	public function save_form_fields($term_id) {
 		foreach($this->fieldnames() as $field) {
+			if(!$this->fieldeditable($field)) {
+				continue;
+			}
+			
 			if($value = $this->POST($field)) {
 				$this->set_field($term_id, $field, $value);
 			} else {

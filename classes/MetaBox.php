@@ -26,6 +26,10 @@ class SktMetaBox extends SktView {
 			$GLOBALS['skt_fundaments']->view($this->post_type->plugin, $this->view, $context);
 		} elseif(count($this->fields) > 0) {
 			foreach($this->fields as $field) {
+				if(!$this->post_type->fieldeditable($field)) {
+					continue;
+				}
+				
 				switch($field) {
 					case '_parent':
 						echo $this->post_type->fieldlabel($field) . '<br />';
