@@ -3,7 +3,6 @@
 *
 * @package wp-fundaments
 */
-
 class SktSyncController {
 	protected $post_type = 'post';
 	protected $public = true;
@@ -118,23 +117,21 @@ class SktSyncController {
 				);
 				
 				if(count($existing) == 1) {
-					$post_id = $existing[0]->ID;
-					$this->update_post($post_id, $data);
-					$post = get_post($post_id);
-					
 					$status_callback && call_user_func($status_callback,
-						'Updated ' . htmlentities($type->labels->singular_name) . ' ' .
-						'"' . $post->post_title . '"'
+						'Updating ' . htmlentities($type->labels->singular_name) . ' ' . $existing[0]->ID
 					);
+					
+					$post_id = $existing[0]->ID;
+					$this->update_post($post_id, $data, $status_callback);
+					$post = get_post($post_id);
 				} else {
-					$post_id = $this->insert_post($data);
+					$post_id = $this->insert_post($data, $status_callback);
+					$status_callback && call_user_func($status_callback,
+						'Importing ' . htmlentities($type->labels->singular_name) . ' ' . $post_id
+					);
+					
 					add_post_meta($post_id, $this->metakey, $remote_id);
 					$post = get_post($post_id);
-					
-					$status_callback && call_user_func($status_callback,
-						'Imported ' . htmlentities($type->labels->singular_name) . ' ' .
-						'"' . $post->post_title . '"'
-					);
 				}
 			}
 		}
@@ -162,7 +159,7 @@ class SktSyncController {
 	protected function parse_data($data) {
 		switch($this->format) {
 			case 'json':
-				return json_decode($data);
+				return json_decode($data, true);
 			case 'xml':
 				return simplexml_load_string($data);
 			default:
@@ -216,7 +213,15 @@ class SktSyncController {
 		return $item;
 	}
 	
-	protected function insert_post($data) {
+	protected function map_attachments($item) {
+		return array();
+	}
+	
+	protected function map_taxonomies($item) {
+		return array();
+	}
+	
+	protected function insert_post($data, $status_callback = null) {
 		$post_id = wp_insert_post(
 			array(
 				'post_type' => $this->post_type,
@@ -224,27 +229,140 @@ class SktSyncController {
 			)
 		);
 		
-		return $this->update_post($post_id, $data);
+		return $this->update_post($post_id, $data, $status_callback);
 	}
 	
-	protected function update_post($post_id, $data) {
-		$data = $this->map_data($data);
+	protected function update_post($post_id, $data, $status_callback = null) {
+		$mapped = $this->map_data($data);
+		$attachments = $this->map_attachments($data);
+		$taxonomies = $this->map_taxonomies($data);
 		$post = array('ID' => $post_id);
 		
-		if(isset($data['title'])) {
-			$post['post_title'] = $data['title'];
-			unset($data['title']);
+		if(isset($mapped['title'])) {
+			$post['post_title'] = $mapped['title'];
+			unset($mapped['title']);
+		}
+		
+		if(isset($mapped['date'])) {
+			$post['post_date'] = date('Y-m-d H:i:s', $mapped['date']);
+			$post['edit_date'] = true;
+			unset($mapped['date']);
 		}
 		
 		if(count($post) > 1) {
 			wp_update_post($post);
 		}
 		
-		foreach($data as $key => $value) {
+		foreach($mapped as $key => $value) {
 			skt_update_field($key, $value, $post_id);
 		}
 		
+		if(count($attachments) > 0) {
+			require_once(ABSPATH . 'wp-admin/includes/image.php');
+			require_once(ABSPATH . 'wp-admin/includes/file.php');
+			require_once(ABSPATH . 'wp-admin/includes/media.php');
+			
+			foreach($attachments as $attachment) {
+				if($attachment_id = $this->download_attachment($post_id, $attachment['url'], $status_callback)) {
+					$this->update_attachment($attachment_id, $attachment, $status_callback);
+				}
+			}
+		}
+		
+		foreach($taxonomies as $taxonomy => $terms) {
+			$this->update_taxonomy_terms($post_id, $taxonomy,
+				is_array($terms) ? $terms : array($terms),
+				$status_callback
+			);
+		}
+		
 		return $post_id;
+	}
+	
+	protected function download_attachment($post_id, $url, $status_callback = null) {
+		$existing = get_posts(
+			array(
+				'post_type' => 'attachment',
+				'post_parent' => $post_id,
+				'meta_query' => array(
+					array(
+						'key' => $this->metakey,
+						'value' => $url
+					)
+				),
+				'posts_per_page' => 1
+			)
+		);
+		
+		if(count($existing) == 1) {
+			$filename = get_attached_file($existing[0]->ID, true);
+			if(is_file($filename)) {
+				return;
+			} else {
+				wp_delete_attachment($existing[0]->ID, true);
+				$status_callback && call_user_func($status_callback, "Re-downloading $url");
+			}
+		} else {
+			$status_callback && call_user_func($status_callback, "Downloading $url");
+		}
+		
+		if(is_wp_error($filename)) {
+			wp_die($filename);
+		}
+		
+		$upload_dir = wp_upload_dir();
+		$filename = download_url($url);
+		$filetype = wp_check_filetype(basename($url));
+		$new_filename = $upload_dir['path'] . '/' . uniqid() . '.' . $filetype['ext'];
+		rename($filename, $new_filename);
+		
+		$attachment_id = wp_insert_attachment(
+			array(
+				'guid' => $upload_dir['url'] . '/' . basename($new_filename),
+				'post_mime_type' => $filetype['type'],
+				'post_title' => basename($url),
+				'post_content' => '',
+				'post_status' => 'inherit'
+			),
+			$new_filename,
+			$post_id
+		);
+		
+		if(is_wp_error($attachment_id)) {
+			wp_die($attachment_id);
+		}
+		
+		update_post_meta($attachment_id, $this->metakey, $url);
+		wp_update_attachment_metadata($attachment_id,
+			wp_generate_attachment_metadata($attachment_id, $new_filename)
+		);
+		
+		set_post_thumbnail($post_id, $attachment_id);
+	}
+	
+	protected function update_attachment($post_id, $attachment) {
+		
+	}
+	
+	protected function update_taxonomy_terms($post_id, $taxonomy, $terms, $status_callback = null) {
+		$term_ids = array();
+		
+		foreach($terms as $term) {
+			if($t = get_term_by('name', $term, $taxonomy)) {
+				$term_ids[] = $t->ID;
+			} else {
+				$t = wp_insert_term($term, $taxonomy);
+				if(is_wp_error($t)) {
+					wp_die($t);
+				}
+				
+				$term_ids[] = $t['term_id'];
+				$status_callback && call_user_func($status_callback, "Creating new $taxonomy term: $term");
+			}
+		}
+		
+		wp_set_post_terms($post_id, $term_ids, $post_id, false);
+		$status_callback && call_user_func($status_callback, "Applying $taxonomy terms");
 	}
 	
 	protected function parse_date($date) {
