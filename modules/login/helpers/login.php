@@ -114,8 +114,11 @@ function skt_authenticate_email($username) {
 
 add_action('wp_login', 'skt_login_redirect', 10, 2);
 function skt_login_redirect($user_login, $user) {
-	if(!in_array('administrator', $user->roles)) {
-		wp_redirect(admin_url('profile.php'));
+	if(!user_can($user, 'edit_posts')) {
+		wp_redirect(
+			apply_filters('skt_login_redirect_url', admin_url('profile.php'))
+		);
+		
 		die();
 	}
 }
