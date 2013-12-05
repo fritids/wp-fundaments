@@ -239,7 +239,7 @@ abstract class SktPostType extends SktFieldManager {
 				$func .= 'global $post; ';
 				
 				add_meta_box(
-					$this->basename . '_' . is_array($box) ? $key : $box,
+					$this->basename . '_' . (is_array($box) ? $key : $box),
 					is_array($box) ? (
 						isset($box['title']) ? $box['title'] : skt_ucwords(str_replace('_', ' ', $key))
 					) : skt_ucwords(str_replace('_', ' ', $box)),
