@@ -13,6 +13,7 @@ function skt_debug($obj) {
 }
 
 add_action('wp_footer', 'skt_debug_print');
+add_action('admin_footer', 'skt_debug_print');
 function skt_debug_print() {
 	if(isset($GLOBALS['skt_debug_objects']) && is_array($GLOBALS['skt_debug_objects'])) {
 		foreach($GLOBALS['skt_debug_objects'] as $i => $obj) {
@@ -22,68 +23,67 @@ function skt_debug_print() {
 				rand(0, 255),
 				rand(0, 255)
 			);
-		
+			
 			$zindex = 9999 + $i; ?>
-		
+			
 			<div class="skt-debug" id="skt-debug-<?php echo $i; ?>" style="position: fixed; top: <?php echo $top; ?>px; left: 0; border-left: 16px solid rgb(<?php echo implode(', ', $rgb); ?>); max-width: 100%; max-height: 100%; overflow: scroll; background: rgba(0, 0, 0, 0.75); color: #999; font-face: monotype; padding: 0; z-index: <?php echo $zindex; ?>;">
 				<pre style="margin: 10px;"><?php print_r($obj); ?></pre>
 			</div>
 			<script>
 				jQuery(document).ready(
-					function() {
-						var bug = jQuery(
+					function($) {
+						var bug = $(
 							'#skt-debug-<?php echo $i; ?>'
 						);
-
+						
 						bug.data(
 							'width', bug.width() + 20
 						).data(
 							'height', bug.height() + 20
 						).hover(
 							function() {
-								if(jQuery(this).data('animating')) {
+								if($(this).data('animating')) {
 									return;
 								}
-
-								jQuery('.skt-debug').not(bug).css('opacity', 0.5).data('animating', true);
-
-								jQuery(this).data('animating', true).animate(
+								
+								$('.skt-debug').not(bug).css('opacity', 0.5).data('animating', true);
+								$(this).data('animating', true).animate(
 									{
-										width: jQuery(this).data('width')
+										width: $(this).data('width')
 									},
 									100,
 									function() {
-										jQuery(this).animate(
+										$(this).animate(
 											{
-												height: jQuery(this).data('height')
+												height: $(this).data('height')
 											},
 											100,
 											function() {
-												jQuery(this).data('animating', false);
+												$(this).data('animating', false);
 											}
 										);
 									}
 								);
 							},
 							function() {
-								if(jQuery(this).data('animating')) {
+								if($(this).data('animating')) {
 									return;
 								}
-
-								jQuery(this).animate(
+								
+								$(this).animate(
 									{
 										height: 16
 									},
 									100,
 									function() {
-										jQuery(this).animate(
+										$(this).animate(
 											{
 												width: 0
 											},
 											100,
 											function() {
-												jQuery(this).data('animating', false);
-												jQuery('.skt-debug').not(bug).css('opacity', 1).data('animating', false);
+												$(this).data('animating', false);
+												$('.skt-debug').not(bug).css('opacity', 1).data('animating', false);
 											}
 										);
 									}
