@@ -63,7 +63,8 @@ your class `MagazineArticlePostType`. The framework would then create a custom p
 - `$show_ui` - Show a user interface for the post type (defaults to `true`).
 - `$queryable` - Whether to make the post type publicly queryable (defaults to the value of `$public`).
 - `$menu_position` - A number denoting the position on the WordPress dashboard menu for this type.
-- `$capability_type` - The default capability of this type (defaults to `page`).
+- `$admin_roles` - An array of roles to which an editor must belong in order to see this content
+- `$user_roles` - An array of roles to which a user must belong in order to see this content
 - `$supports` - An array with the fields and functionality the type supports (defaults to `title`, `slug`, `editor` and `thumbnail`).
 - `$hierarchical` - Whether the post type is hierarchical (defaults to `true`).
 - `$parent` - the parent post type. If set, the link to the post type can be found in the menu of its parent type.

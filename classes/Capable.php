@@ -7,6 +7,16 @@
 require_once('FieldManager.php');
 abstract class SktCapable extends SktFieldManager {
 	protected $stubborn_capabilities = array();
+	protected $admin_roles = array();
+	protected $user_roles = array();
+	
+	function __construct($plugin) {
+		parent::__construct($plugin);
+		
+		if(is_user_logged_in()) {
+			$this->register_capabilities();
+		}
+	}
 	
 	protected function capabilities() {
 		return array();
@@ -16,18 +26,15 @@ abstract class SktCapable extends SktFieldManager {
 		global $wp_roles;
 		
 		foreach($wp_roles->get_names() as $r => $name) {
-			if(in_array($r, $this->roles)) {
-				foreach($this->capabilities() as $meta => $capability) {
+			if(in_array($r, $this->admin_roles)) {
+				foreach($this->admin_capabilities() as $meta => $capability) {
 					$wp_roles->add_cap($r, $capability);
 				}
-			} else {
-				foreach($this->capabilities() as $meta => $capability) {
-					// If the capability is marked as "stubborn", that means it's probably
-					// referenced elsewhere by another class and shouldn't be removed
-					
-					if(!in_array($capability, $this->stubborn_capabilities)) {
-						$wp_roles->remove_cap($r, $capability);
-					}
+			}
+			
+			if(in_array($r, $this->user_roles)) {
+				foreach($this->user_capabilities() as $capability) {
+					$wp_roles->add_cap($r, $capability);
 				}
 			}
 		}

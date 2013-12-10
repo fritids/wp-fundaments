@@ -6,7 +6,7 @@
 
 abstract class SktPostType extends SktCapable {
 	protected $supports = array('title', 'slug', 'editor', 'thumbnail');
-	protected $roles = array('administrator', 'editor');
+	protected $admin_roles = array('administrator', 'editor');
 	
 	function __construct($plugin) {
 		if(isset($this->rewrite) && is_string($this->rewrite)) {
@@ -24,13 +24,10 @@ abstract class SktPostType extends SktCapable {
 			}
 		}
 		
-		$this->plugin = $plugin;
 		$this->register_post_type();
+		parent::__construct($plugin);
 		
-		if(method_exists($this, "the_content")) {
-			add_filter('the_content', array(&$this, 'the_contents'));
-		}
-		
+		add_filter('the_content', array(&$this, 'the_contents'));
 		if(isset($this->list_fields)) {
 			add_filter('manage_' . $this->basename . '_posts_columns', array(&$this, 'post_columns'));
 			add_action('manage_' . $this->basename . '_posts_custom_column', array(&$this, 'post_columns_data'));
@@ -40,11 +37,12 @@ abstract class SktPostType extends SktCapable {
 		add_filter('post_type_link', array(&$this, 'permalinks'), 10, 3);
 		add_action('pre_get_posts', array(&$this, 'pre_get_posts'));
 		add_action('admin_menu', array(&$this, 'admin_menu'));
-		add_action('admin_init', array(&$this, 'register_capabilities'));
 		add_filter('skt_formfield_attrs_by_name', array(&$this, 'formfield_attrs'), 10, 2);
+		add_action('template_redirect', array(&$this, 'template_redirect'));
+		add_filter('body_class', array(&$this, 'body_class'));
 	}
 	
-	protected function capabilities() {
+	protected function admin_capabilities() {
 		return array(
 			'publish_posts' => 'publish_' . $this->basename . 's',
 			'edit_posts' => 'edit_' . $this->basename . 's',
@@ -56,6 +54,10 @@ abstract class SktPostType extends SktCapable {
 			'delete_post' => 'delete_' . $this->basename,
 			'read_post' => 'read_' . $this->basename
 		);
+	}
+	
+	protected function user_capabilities() {
+		return array('view_' . $this->basename . 's');
 	}
 	
 	public function fieldeditable($name) {
@@ -134,7 +136,7 @@ abstract class SktPostType extends SktCapable {
 			'show_ui' => isset($this->show_ui) ? $this->show_ui : true,
 			'menu_position' => isset($this->menu_position) ? $this->menu_position : SKT_DEFAULT_MENU_POSITION,
 			'supports' => $this->supports,
-			'capabilities' => $this->capabilities(),
+			'capabilities' => $this->admin_capabilities(),
 			'map_meta_cap' => true,
 			'hierarchical' => isset($this->hierarchical) ? $this->hierarchical : SKT_DEFAULT_HIERARCHICAL,
 			'register_meta_box_cb' => array(&$this, 'register_meta_boxes')
@@ -403,7 +405,33 @@ abstract class SktPostType extends SktCapable {
 		
 		$type = get_post_type($post);
 		if($type == $this->basename) {
-			return $this->the_content($post, $content);
+			if(isset($this->user_roles) && is_array($this->user_roles) && count($this->user_roles)) {
+				$ok = false;
+				
+				foreach($this->user_roles as $role) {
+					if(current_user_can($role)) {
+						$ok = true;
+					}
+				}
+				
+				if(!$ok) {
+					if(is_single()) {
+						return apply_filters('skt_content_forbidden',
+							'Please <a href="' . wp_login_url() . '">log in</a> or ' .
+							'<a href="' . wp_registration_url() . '">sign up</a> ' .
+							'to view this content.'
+						);
+					} else {
+						return '';
+					}
+				}
+			}
+		}
+		
+		if($type == $this->basename) {
+			if(method_exists($this, 'the_content')) {
+				return $this->the_content($post, $content);
+			}
 		}
 		
 		return $content;
@@ -576,5 +604,38 @@ abstract class SktPostType extends SktCapable {
 		}
 		
 		return $attrs;
+	}
+	
+	public function template_redirect() {
+		if((is_single() || is_archive()) && get_post_type() == $this->basename) {
+			if(isset($this->user_roles) && is_array($this->user_roles) && count($this->user_roles) > 0) {
+				foreach($this->user_roles as $role) {
+					if(current_user_can($role)) {
+						return;
+					}
+				}
+				
+				$GLOBALS['skt_content_forbidden'] = true;
+				if(apply_filters('skt_redirect_forbidden', true)) {
+					auth_redirect();
+				}
+			}
+		}
+	}
+	
+	public function body_class($classes) {
+		if((is_single() || is_archive()) && get_post_type() == $this->basename) {
+			if(isset($this->user_roles) && is_array($this->user_roles) && count($this->user_roles) > 0) {
+				foreach($this->user_roles as $role) {
+					if(current_user_can($role)) {
+						return $classes;
+					}
+				}
+				
+				$classes[] = 'forbidden';
+			}
+		}
+		
+		return $classes;
 	}
 }

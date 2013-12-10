@@ -6,26 +6,29 @@
 
 abstract class SktTaxonomy extends SktCapable {
 	protected $post_type = 'post';
-	protected $roles = array('administrator', 'editor');
+	protected $admin_roles = array('administrator', 'editor');
 	
 	function __construct($plugin) {
-		$this->plugin = $plugin;
 		$this->register_taxonomy();
+		parent::__construct($plugin);
 		$this->stubborn_capabilities[] = 'edit_' . $this->post_type . 's';
 		add_action($this->basename . '_add_form_fields', array(&$this, 'add_form_fields'));
 		add_action($this->basename . '_edit_form_fields', array(&$this, 'edit_form_fields'));
 		add_action('edited_' . $this->basename, array(&$this, 'save_form_fields'));  
 		add_action('create_' . $this->basename, array(&$this, 'save_form_fields'));
-		add_action('admin_init', array(&$this, 'register_capabilities'));
 	}
 	
-	protected function capabilities() {
+	protected function admin_capabilities() {
 		return array(
 			'manage_terms' => 'manage_' . $this->basename . 's',
 			'edit_terms' => 'manage_' . $this->basename . 's',
 			'delete_terms' => 'manage_' . $this->basename . 's',
 			'assign_terms' => 'edit_' . $this->post_type . 's'
 		);
+	}
+	
+	protected function user_capabilities() {
+		return array('view_' . $this->basename . 's');
 	}
 	
 	private function register_taxonomy() {
@@ -87,7 +90,7 @@ abstract class SktTaxonomy extends SktCapable {
 			'show_ui' => isset($this->show_ui) ? $this->show_ui : true,
 			'show_admin_column' => isset($this->show_admin_column) ? $this->show_admin_column : true,
 			'hierarchical' => isset($this->hierarchical) ? $this->hierarchical : true,
-			'capabilities' => $this->capabilities()
+			'capabilities' => $this->admin_capabilities()
 		);
 		
 		if(isset($this->parent_item_colon)) {
