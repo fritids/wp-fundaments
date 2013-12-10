@@ -273,11 +273,8 @@ abstract class SktPostType extends SktCapable {
 				}
 				
 				$view = 'post_types/' . $this->basename . '/meta/' . (is_array($box) ? $key : $box);
-				$func = '$g = $GLOBALS[\'skt_fundaments\']; ';
-				$func .= '$p = $g->get_post_type("' . $this->plugin . '", "' . $this->basename . '"); ';
-				$func .= 'global $post; ';
-				
 				$usable_fields = array();
+				
 				if(is_array($box) && isset($box['fields'])) {
 					foreach($box['fields'] as $field) {
 						if($this->fieldeditable($field)) {
@@ -286,8 +283,10 @@ abstract class SktPostType extends SktCapable {
 					}
 				}
 				
-				if(!count($usable_fields)) {
-					continue;
+				if(!$GLOBALS['skt_fundaments']->view_exists($this->plugin, $view)) {
+					if(!count($usable_fields)) {
+						continue;
+					}
 				}
 				
 				add_meta_box(
