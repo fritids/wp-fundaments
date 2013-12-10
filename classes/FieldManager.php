@@ -1,8 +1,8 @@
 <?php /**
  * A base class for managing items with custom fields
-*
-* @package wp-fundaments
-*/
+ *
+ * @package wp-fundaments
+ */
 
 abstract class SktFieldManager {
 	public $plugin;

@@ -1,8 +1,8 @@
 <?php /**
-* A class to handle calls to AJAX functions defined in Fundaments
-*
-* @package wp-fundaments
-*/
+ * A class to handle calls to AJAX functions defined in Fundaments
+ *
+ * @package wp-fundaments
+ */
 
 class SktAjaxCall {
 	public function __construct($filename) {

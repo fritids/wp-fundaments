@@ -1,4 +1,8 @@
-<?php
+<?php /**
+ * Helper functions for working with custom fields
+ *
+ * @package wp-fundaments
+ */
 
 function skt_render_field($field, $attrs = array()) {
 	$GLOBALS['skt_fundaments']->input($field, $attrs);

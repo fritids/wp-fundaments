@@ -1,8 +1,8 @@
 <?php /**
  * A base class for handling objects that have settings
-*
-* @package wp-fundaments
-*/
+ *
+ * @package wp-fundaments
+ */
 
 abstract class SktSettingsPageBase extends SktFieldManager {
 	function __construct($plugin) {
@@ -111,28 +111,28 @@ abstract class SktSettingsPageBase extends SktFieldManager {
 		$opts = $this->fieldattrs($key);
 		$type = $this->fieldtype($key);
 		
-		if(substr($type, 0, 9) == 'provider:') {
-			$opts = $this->fieldattrs($key);
-			$type = substr($type, 9);
-			$fieldname = 'skt_fundaments_provider_' . $this->plugin . "_$type";
-			$opts['type'] = 'select';
-			$opts['choices'] = skt_get_provider_choices($this->plugin, $type);
-			$opts['value'] = get_option($fieldname);
-		} else {
-			$opts['value'] = $this->get_field($key);
-			$type = $opts['type'];
-			if(isset($opts['default'])) {
-				if(!isset($opts['value']) || empty($opts['value'])) {
-					$opts['value'] = $opts['default'];
-				}
-				
-				unset($opts['default']);
+		if(isset($opts['type']) && substr($opts['type'], 0, 9) == 'provider:') {
+			$parts = explode(':', substr($opts['type'], 9));
+			if($parts[0] == '_theme') {
+				$parts[0] = basename(get_template_directory());
 			}
 			
+			$fieldname = 'skt_fundaments_provider_' . $parts[0] . '_' . $parts[1];
+			$opts['value'] = get_option($fieldname);
+		} else {
 			$fieldname = $this->fieldname($key);
+			$opts['value'] = $this->get_field($key);
 		}
 		
-		if($type == 'checkbox') {
+		if(isset($opts['default'])) {
+			if(!isset($opts['value']) || empty($opts['value'])) {
+				$opts['value'] = $opts['default'];
+			}
+			
+			unset($opts['default']);
+		}
+		
+		if(isset($opts['type']) && $opts['type'] == 'checkbox') {
 			$opts['label'] = isset($opts['label']) ? $opts['label'] : skt_ucwords($key);
 			$label = '';
 		} else {

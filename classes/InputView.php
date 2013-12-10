@@ -1,8 +1,9 @@
 <?php /**
-* A form input class
-*
-* @package wp-fundaments
-*/
+ * A form input class
+ *
+ * @package wp-fundaments
+ */
+
 require_once('View.php');
 class SktInputView extends SktView {
 	function __construct($name, $attrs) {
@@ -289,8 +290,8 @@ class SktInputView extends SktView {
 					}
 					
 					$value = isset($attrs['value']) ? $attrs['value'] : array();
-					if(!is_array($value) && $value) {
-						$value = array($value);
+					if(!is_array($value)) {
+						$value = $value ? array($value) : array();
 					}
 					
 					if(isset($attrs['value'])) {

@@ -1,8 +1,8 @@
 <?php /**
  * A class for managing custom fieldsets
-*
-* @package wp-fundaments
-*/
+ *
+ * @package wp-fundaments
+ */
 
 class SktFieldset extends SktFieldManager {
 	protected $name;

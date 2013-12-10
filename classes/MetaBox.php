@@ -1,8 +1,8 @@
 <?php /**
-* A basic meta-box class
-*
-* @package wp-fundaments
-*/
+ * A basic meta-box class
+ *
+ * @package wp-fundaments
+ */
 
 class SktMetaBox extends SktView {
 	function __construct($post_type, $view, $fields = array(), $label = false) {

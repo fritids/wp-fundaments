@@ -1,7 +1,8 @@
-<?php /* A base class for handling content that has capability types
-*
-* @package wp-fundaments
-*/
+<?php /**
+ * A base class for handling content that has capability types
+ *
+ * @package wp-fundaments
+ */
 
 require_once('FieldManager.php');
 abstract class SktCapable extends SktFieldManager {

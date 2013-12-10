@@ -1,8 +1,8 @@
 <?php /**
-* A class that allows plugins to refer to a single Fundaments context
-*
-* @package wp-fundaments
-*/
+ * A class that allows plugins to refer to a single Fundaments context
+ *
+ * @package wp-fundaments
+ */
 
 class SktFundamentsContext {
 	private $post_types = array();

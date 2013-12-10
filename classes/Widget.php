@@ -1,8 +1,8 @@
 <?php /**
-* A basic widget class
-*
-* @package wp-fundaments
-*/
+ * A basic widget class
+ *
+ * @package wp-fundaments
+ */
 
 abstract class SktWidget extends SktFieldManager {
 	public $basename = '';

@@ -1,8 +1,8 @@
 <?php /**
-* A base WP_Widget class
-*
-* @package wp-fundaments
-*/
+ * A base WP_Widget class
+ *
+ * @package wp-fundaments
+ */
 
 class SktWidgetBase extends WP_Widget {
 	protected $plugin;

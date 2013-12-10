@@ -1,8 +1,8 @@
 <?php /**
-* A basic view class
-*
-* @package wp-fundaments
-*/
+ * A basic view class
+ *
+ * @package wp-fundaments
+ */
 
 class SktView {
 	public function __construct($html = '') {

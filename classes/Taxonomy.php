@@ -1,8 +1,8 @@
 <?php /**
  * A base class for creating content taxonomies
-*
-* @package wp-fundaments
-*/
+ *
+ * @package wp-fundaments
+ */
 
 abstract class SktTaxonomy extends SktCapable {
 	protected $post_type = 'post';

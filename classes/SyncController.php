@@ -1,8 +1,9 @@
 <?php /**
-* A basic sync controller class
-*
-* @package wp-fundaments
-*/
+ * A basic sync controller class
+ *
+ * @package wp-fundaments
+ */
+
 class SktSyncController {
 	protected $post_type = 'post';
 	protected $public = true;

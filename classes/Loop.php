@@ -1,8 +1,8 @@
 <?php /**
-* A basic loop class
-*
-* @package wp-fundaments
-*/
+ * A basic loop class
+ *
+ * @package wp-fundaments
+ */
 
 class SktLoop {
 	private $data = array();

@@ -1,8 +1,8 @@
 <?php /**
-* A base user-profile section class
-*
-* @package wp-fundaments
-*/
+ * A base user-profile section class
+ *
+ * @package wp-fundaments
+ */
 
 abstract class SktProfile extends SktFieldManager {
 	function __construct($plugin) {

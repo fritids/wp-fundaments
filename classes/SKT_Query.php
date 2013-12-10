@@ -1,4 +1,8 @@
-<?php
+<?php /**
+ * An extension of the built-in WP_Query class, for handling custom post types
+ *
+ * @package wp-fundaments
+ */
 
 class SKT_Query extends WP_Query {
 	function __construct($post_type, $args = array()) {

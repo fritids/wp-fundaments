@@ -1,8 +1,8 @@
 <?php /**
  * A base class for handling generic, pluggable provider-based functionality
-*
-* @package wp-fundaments
-*/
+ *
+ * @package wp-fundaments
+ */
 
 abstract class SktProviderBase {
 	protected $mappings = array();
@@ -12,6 +12,7 @@ abstract class SktProviderBase {
 	function __construct($plugin) {
 		$this->plugin = $plugin;
 		$basename = get_class($this);
+		
 		if(substr($basename, strlen($basename) - 8) == 'Provider') {
 			$basename = substr($basename, 0, strlen($basename) - 8);
 		}
@@ -38,7 +39,7 @@ abstract class SktProviderBase {
 			$new_basename .= $c;
 		}
 		
-		if(!isset($this->name)) {
+		if(!$this->name) {
 			$this->name = skt_ucwords($new_friendly_name);
 		}
 	}
