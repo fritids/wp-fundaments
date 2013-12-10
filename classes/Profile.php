@@ -51,6 +51,7 @@ abstract class SktProfile extends SktFieldManager {
 		add_filter('registration_errors', array(&$this, 'registration_errors'), 10, 3);
 		
 		add_filter('authenticate', array(&$this, 'authenticate'), 10, 3);
+		add_filter('retrieve_password', array(&$this, 'retrieve_password'));
 	}
 	
 	public function get_field($user, $field, $default = null) {
@@ -85,7 +86,7 @@ abstract class SktProfile extends SktFieldManager {
 				$user = wp_get_current_user();
 			}
 			
-			if (!$user->has_cap('edit_posts')) {
+			if (!current_user_can('edit_posts')) {
 				skt_open_profile_fieldset($this->name);
 				foreach($this->fields as $field => $opts) {
 					if(is_array($opts)) {
@@ -257,5 +258,19 @@ abstract class SktProfile extends SktFieldManager {
 	public function authenticate($user, $username, $password) {
 		// Adds custom authentication
 		return $use;
+	}
+	
+	public function retrieve_password($username) {
+		if(method_exists($this, 'reset_password')) {
+			if($user = get_user_by('login', $username)) {
+				if($this->reset_password($user)) {
+					wp_redirect(
+						wp_login_url() . '?checkemail=confirm'
+					);
+					
+					die();
+				}
+			}
+		}
 	}
 }

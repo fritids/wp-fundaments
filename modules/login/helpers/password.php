@@ -13,10 +13,6 @@
 		$errors->add('invalidkey', __('Sorry, that key does not appear to be valid.'));
 	}
 	
-	$errors->add('registermsg',
-		__('Please enter your username or e-mail address. You will receive a new password via e-mail.'), 'message'
-	);
-	
 	do_action('lost_password');
 	do_action('lostpassword_post');
 	
@@ -35,14 +31,19 @@ function skt_reset_form_print() {
 	} ?>
 	
 	<form class="loginform" name="lostpasswordform" id="lostpasswordform" action="<?php echo site_url('wp-login.php?action=lostpassword', 'login_post') ?>" method="post">
-		<?php do_action('skt_signup_field', 'user_login',
+		<?php skt_open_signup_fieldset(
+			apply_filters('skt_signup_fieldset1_title', 'Reset your password')
+		);
+		
+		skt_signup_field('user_login',
 			array(
-				'label' => 'Username or email address',
+				'label' => (defined('SKT_USERNAME_AUTH') && SKT_USERNAME_AUTH ? 'Username or e' : 'E') . 'mail address',
 				'value' => isset($_POST['user_login']) ? $_POST['user_login'] : null
 			)
 		);
 		
-		do_action('lostpassword_form'); ?>
+		do_action('lostpassword_form');
+		skt_close_signup_fieldset(); ?>
 		
 		<p class="submit">
 			<input type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Get New Password'); ?>" tabindex="100" />
