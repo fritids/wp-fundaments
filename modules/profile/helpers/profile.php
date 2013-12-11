@@ -1,4 +1,8 @@
 <?php function skt_profile_init() {
+	if (!empty($_POST) && !wp_verify_nonce($_POST['skt-fundaments-profile'], basename(__file__))) {
+		wp_die('Not a chance!');
+	}
+	
 	$current_user = wp_get_current_user();
 	$user_id = $current_user->ID;
 	$path = get_template_directory(). '/wp-profile.php';
@@ -131,6 +135,7 @@ function skt_profile_form_print() {
 			<input type="hidden" name="action" value="update" />
 			<input type="hidden" name="user_id" id="user_id" value="<?php echo $user_id; ?>" />
 			<input type="submit" id="cycsubmit" value="<?php _e('Update Profile'); ?>" name="submit" />
+			<?php wp_nonce_field(basename(__file__), 'skt-fundaments-profile'); ?>
 		 </p>
 	</form>
 <?php }

@@ -1,6 +1,10 @@
 <?php function skt_login_form() {
 	$redirect_to = isset($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : admin_url();
 	
+	if (!empty($_POST) && !wp_verify_nonce($_POST['skt-fundaments-login'], basename(__file__))) {
+		wp_die('Not a chance!');
+	}
+	
 	if (is_ssl() && force_ssl_login() && !force_ssl_admin() && (strpos($redirect_to, 'https') != 0) && (strpos($redirect_to, 'http') != 0)) {
 		$secure_cookie = false;
 	} else {
@@ -46,9 +50,18 @@
 	
 	$GLOBALS['skt_login_errors'] = $errors;
 	
-	$path = get_template_directory(). '/wp-login.php';
-	if(is_file($path)) {
-		include($path);
+	$login_path = get_template_directory(). '/wp-login.php';
+	if(isset($_GET['loggedout']) && $_GET['loggedout'] == 'true') {
+		$logged_out_path = get_template_directory(). '/wp-logout.php';
+		
+		if(is_file($logged_out_path)) {
+			include($logged_out_path);
+			return;
+		}
+	}
+	
+	if(is_file($login_path)) {
+		include($login_path);
 	}
 }
 
@@ -67,14 +80,14 @@ function skt_login_form_print() {
 		if(!defined('SKT_USERNAME_AUTH') || SKT_USERNAME_AUTH) {
 			skt_signup_field('log',
 				array(
-					'label' => 'Username',
+					'label' => apply_filters('skt_signup_field_label', __('Username'), 'log'),
 					'value' => isset($_POST['log']) ? $_POST['log'] : null
 				)
 			);
 		} else {
 			skt_signup_field('log',
 				array(
-					'label' => 'Email address',
+					'label' => apply_filters('skt_signup_field_label', __('Email address'), 'log'),
 					'type' => 'email',
 					'value' => isset($_POST['log']) ? $_POST['log'] : null
 				)
@@ -83,7 +96,7 @@ function skt_login_form_print() {
 		
 		skt_signup_field('pwd',
 			array(
-				'label' => 'Password',
+				'label' => apply_filters('skt_signup_field_label', __('Password'), 'pwd'),
 				'type' => 'password'
 			)
 		);
@@ -91,6 +104,7 @@ function skt_login_form_print() {
 		skt_close_signup_fieldset(); ?>
 		
 		<p class="submit">
+			<?php wp_nonce_field(basename(__file__), 'skt-fundaments-login'); ?>
 			<input type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Login'); ?>" />
 			<input type="hidden" name="testcookie" value="1" />
 		</p>

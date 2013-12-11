@@ -73,18 +73,32 @@ class SktInputView extends SktView {
 			}
 			
 			$this->html .= '</select><select id="' . $id . '_month" name="' . $name . '_month" class="skt-date-month">';
+			$months = array();
 			for($i = 1; $i <= 12; $i ++) {
+				$months[$i] = date('F', mktime(0, 0, 0, $i, 1, $now_year));
+			}
+			
+			$months = apply_filters('skt_formfield_months', $months, $name);
+			foreach($months as $i => $month_name) {
 				$this->html .= '<option value="' . $i . '"';
 				
 				if($i == $month) {
 					$this->html .= ' selected';
 				}
 				
-				$this->html .= '>' . date('F', mktime(0, 0, 0, $i, 1, $now_year)) . '</option>';
+				$this->html .= '>' . htmlentities($month_name) . '</option>';
 			}
 			
 			$this->html .= '</select><select id="' . $id . '_year" name="' . $name . '_year" class="skt-date-year">';
+			$years = array();
+			
 			for($i = $now_year - 50; $i <= $now_year + 50; $i ++) {
+				$years[] = $i;
+			}
+			
+			$years = apply_filters('skt_formfield_years', $years, $name);
+			
+			foreach($years as $i) {
 				$this->html .= '<option value="' . $i . '"';
 				
 				if($i == $year) {

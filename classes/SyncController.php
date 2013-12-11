@@ -68,9 +68,12 @@ class SktSyncController {
 			<?php if($_SERVER['REQUEST_METHOD'] != 'POST') { ?>
 				<form method="post">
 					<?php echo wpautop($this->description); ?>
+					<?php wp_nonce_field(basename(__file__), 'skt-fundaments-sync'); ?>
 					<button type="submit" class="button-primary">Sync <?php echo htmlentities($this->post_type_object->labels->name); ?></button>
 				</form>
-			<?php } else { ?>
+			<?php } elseif (empty($_POST) || !wp_verify_nonce($_POST['skt-fundaments-sync'], basename(__file__))) {
+				wp_die('Not a chance!');
+			} else { ?>
 				<ul id="skt-sync-log"></ul>
 				<iframe id="skt-sync-frame" src="<?php echo plugins_url('skt-fundaments/services/sync.php', 'skt-fundaments'); ?>?plugin=<?php echo urlencode($this->plugin); ?>&amp;type=<?php echo urlencode($this->post_type); ?>&amp;_ts=<?php echo time(); ?>" frameborder="0" width="0" height="0"></iframe>
 				

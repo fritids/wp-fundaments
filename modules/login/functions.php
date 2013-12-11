@@ -30,4 +30,33 @@
 			die();
 		}
 	}
+	
+	add_filter('body_class', 'skt_login_body_class');
+	function skt_login_body_class($classes) {
+		$path = get_template_directory(). '/wp-login.php';
+		if(is_file($path)) {
+			if (isset($_REQUEST['action'])) {
+				$action = $_REQUEST['action'];
+			} else {
+				$action = 'login';
+			}
+			
+			switch($action) {
+				case 'lostpassword': case 'retrievepassword':
+					$classes[] = 'wp-lost-password';
+					break;
+				case 'register':
+					$classes[] = 'wp-register';
+					break;
+				default:
+					if(isset($_GET['loggedout']) && $_GET['loggedout'] == 'true') {
+						$classes[] = 'wp-logged-out';
+					}
+					
+					$classes[] = 'wp-login';
+			}
+		}
+		
+		return $classes;
+	}
 }

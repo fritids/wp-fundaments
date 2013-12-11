@@ -1,4 +1,8 @@
 <?php function skt_password_form() {
+	if (!empty($_POST) && !wp_verify_nonce($_POST['skt-fundaments-password'], basename(__file__))) {
+		wp_die('Not a chance!');
+	}
+	
 	$errors = new WP_Error();
 	
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -37,7 +41,10 @@ function skt_reset_form_print() {
 		
 		skt_signup_field('user_login',
 			array(
-				'label' => (defined('SKT_USERNAME_AUTH') && SKT_USERNAME_AUTH ? 'Username or e' : 'E') . 'mail address',
+				'label' => apply_filters('skt_signup_field_label',
+					__((defined('SKT_USERNAME_AUTH') && SKT_USERNAME_AUTH ? 'Username or e' : 'E') . 'mail address'),
+					'user_login'
+				),
 				'value' => isset($_POST['user_login']) ? $_POST['user_login'] : null
 			)
 		);
@@ -46,6 +53,7 @@ function skt_reset_form_print() {
 		skt_close_signup_fieldset(); ?>
 		
 		<p class="submit">
+			<?php wp_nonce_field(basename(__file__), 'skt-fundaments-password'); ?>
 			<input type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Get New Password'); ?>" tabindex="100" />
 		</p>
 	</form>

@@ -71,6 +71,10 @@
 }
 
 function skt_register_form() {
+	if (!empty($_POST) && !wp_verify_nonce($_POST['skt-fundaments-register'], basename(__file__))) {
+		wp_die('Not a chance!');
+	}
+	
 	if (!get_option('users_can_register')) {
 		wp_redirect(
 			get_bloginfo('wpurl') . '/wp-login.php?registration=disabled'
@@ -126,7 +130,7 @@ function skt_register_form_print() {
 		skt_signup_field('first_name',
 			array(
 				'value' => isset($_POST['first_name']) ? $_POST['first_name'] : null,
-				'label' => 'First Name',
+				'label' => apply_filters('skt_signup_field_label', __('First Name'), 'first_name'),
 				'autocomplete' => 'off'
 			)
 		);
@@ -134,7 +138,7 @@ function skt_register_form_print() {
 		skt_signup_field('last_name',
 			array(
 				'value' => isset($_POST['last_name']) ? $_POST['last_name'] : null,
-				'label' => 'Last Name',
+				'label' => apply_filters('skt_signup_field_label', __('Last Name'), 'last_name'),
 				'autocomplete' => 'off'
 			)
 		);
@@ -142,7 +146,7 @@ function skt_register_form_print() {
 		if(!defined('SKT_USERNAME_AUTH') || SKT_USERNAME_AUTH) {
 			skt_signup_field('user_login',
 				array(
-					'label' => 'Choose a Username',
+					'label' => apply_filters('skt_signup_field_label', __('Choose a Username'), 'user_login'),
 					'value' => isset($_POST['user_login']) ? $_POST['user_login'] : null,
 					'autocomplete' => 'off'
 				)
@@ -152,7 +156,7 @@ function skt_register_form_print() {
 		skt_signup_field('user_email',
 			array(
 				'type' => 'email',
-				'label' => 'Email Address',
+				'label' => apply_filters('skt_signup_field_label', __('Email Address'), 'email'),
 				'value' => isset($_POST['user_email']) ? $_POST['user_email'] : null,
 				'autocomplete' => 'off'
 			)
@@ -160,7 +164,7 @@ function skt_register_form_print() {
 		
 		skt_signup_field('user_pass',
 			array(
-				'label' => 'Password',
+				'label' => apply_filters('skt_signup_field_label', __('Password'), 'user_pass'),
 				'type' => 'password',
 				'value' => isset($_POST['user_pass']) ? $_POST['user_pass'] : null,
 				'autocomplete' => 'off'
@@ -169,7 +173,7 @@ function skt_register_form_print() {
 		
 		skt_signup_field('pass_confirm',
 			array(
-				'label' => 'Confirm Password',
+				'label' => apply_filters('skt_signup_field_label', __('Confirm Password'), 'pass_confirm'),
 				'type' => 'password',
 				'value' => isset($_POST['pass_confirm']) ? $_POST['pass_confirm'] : null,
 				'autocomplete' => 'off'
@@ -180,6 +184,7 @@ function skt_register_form_print() {
 		do_action('register_form'); ?>
 		<p id="reg_passmail"><?php do_action('skt_register_form_footer') ?></p>
 		<p class="submit">
+			<?php wp_nonce_field(basename(__file__), 'skt-fundaments-register'); ?>
 			<input tabindex="4" type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Sign up'); ?>" tabindex="100" />
 		</p>
 	</form>
