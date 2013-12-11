@@ -27,6 +27,8 @@ function skt_unserialise_field_value($value, $type = 'text') {
 			}
 		case 'number':
 			return intVal($value);
+		case 'float':
+			return floatVal($value);
 		case 'checkbox':
 			if(is_array($value)) {
 				return $value;
