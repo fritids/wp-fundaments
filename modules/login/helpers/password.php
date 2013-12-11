@@ -19,8 +19,14 @@
 	
 	do_action('lost_password');
 	do_action('lostpassword_post');
-	
 	$GLOBALS['skt_login_errors'] = $errors;
+	
+	$lost_password_path = get_template_directory(). '/wp-lostpassword.php';
+	if(is_file($lost_password_path)) {
+		include($lost_password_path);
+		return;
+	}
+	
 	$path = get_template_directory(). '/wp-login.php';
 	if(is_file($path)) {
 		include($path);
@@ -36,7 +42,7 @@ function skt_reset_form_print() {
 	
 	<form class="loginform" name="lostpasswordform" id="lostpasswordform" action="<?php echo site_url('wp-login.php?action=lostpassword', 'login_post') ?>" method="post">
 		<?php skt_open_signup_fieldset(
-			apply_filters('skt_signup_fieldset1_title', 'Reset your password')
+			apply_filters('skt_signup_fieldset1_title', '')
 		);
 		
 		skt_signup_field('user_login',

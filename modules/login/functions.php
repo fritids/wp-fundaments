@@ -43,7 +43,7 @@
 			
 			switch($action) {
 				case 'lostpassword': case 'retrievepassword':
-					$classes[] = 'wp-lost-password';
+					$classes[] = 'wp-lostpassword';
 					break;
 				case 'register':
 					$classes[] = 'wp-register';
