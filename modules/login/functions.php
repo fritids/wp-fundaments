@@ -11,11 +11,6 @@
 				$action = 'login';
 			}
 			
-			add_filter('wp_title','skt_login_title');
-			function skt_login_title() {
-				return 'Login';
-			}
-			
 			switch($action) {
 				case 'lostpassword': case 'retrievepassword':
 					skt_password_form();
@@ -29,6 +24,29 @@
 			
 			die();
 		}
+	}
+	
+	
+	add_filter('wp_title','skt_login_title');
+	function skt_login_title($title) {
+		if(is_file(get_template_directory(). '/wp-login.php')) {
+			if (isset($_REQUEST['action'])) {
+				$action = $_REQUEST['action'];
+			} else {
+				$action = 'login';
+			}
+			
+			switch($action) {
+				case 'lostpassword': case 'retrievepassword':
+					return apply_filters('skt_login_title', __('Reset Your Password'), $action);
+				case 'register':
+					return apply_filters('skt_login_title', __('Sign Up'), $action);
+				default:
+					return apply_filters('skt_login_title', __('Log in'), $action);
+			}
+		}
+		
+		return $title;
 	}
 	
 	add_filter('body_class', 'skt_login_body_class');
