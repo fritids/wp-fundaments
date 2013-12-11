@@ -21,15 +21,14 @@ if(is_file(get_template_directory(). '/wp-profile.php')) {
 		return $classes;
 	}
 	
+	add_action('admin_init', 'skt_profile_admin_init', 1);
 	function skt_profile_admin_init() {
 		global $pagenow;
-		if(!current_user_can('edit_posts') && $pagenow != 'profile.php') {
+		if(!current_user_can('edit_posts') && $pagenow != 'profile.php' && $pagenow != 'admin-ajax.php') {
 			global $wp_query;
 			$wp_query->is_404 = true;
 			get_template_part('404');
 			die();
 		}
 	}
-	
-	add_action('admin_init', 'skt_profile_admin_init', 1);
 }
