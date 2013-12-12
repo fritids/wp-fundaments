@@ -120,6 +120,32 @@ function skt_the_field($field, $post_id = null) {
 	}
 }
 
+function skt_has_field($field, $post_id = null) {
+	if(!$post_id) {
+		$post_id = get_the_ID();
+	}
+	
+	$type = get_post_type($post_id);
+	if(!$type) {
+		wp_die('Post type could not be determined by ID');
+	}
+	
+	$context = $GLOBALS['skt_fundaments'];
+	
+	if($handler = $context->find_post_type($type)) {
+		$type = $handler->fieldtype($field);
+		$value = $handler->get_field($post_id, $field);
+		
+		if(is_array($value)) {
+			return count($value) > 0;
+		}
+		
+		return !empty($value) && !is_null($value) && $value;
+	}
+	
+	return false;
+}
+
 function skt_update_field($field, $value, $post_id = null) {
 	if(!$post_id) {
 		$post_id = get_the_ID();
