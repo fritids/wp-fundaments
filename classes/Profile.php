@@ -42,16 +42,19 @@ abstract class SktProfile extends SktFieldManager {
 		add_filter('show_user_profile', array(&$this, 'form_fields'));
 		add_filter('edit_user_profile', array(&$this, 'form_fields'));
 		
-		add_action('personal_options_update', array(&$this, 'save_form_fields'));
 		add_action('edit_user_profile_update', array(&$this, 'save_form_fields'));
+		add_action('personal_options_update', array(&$this, 'save_form_fields'));
+		add_action('skt_user_edited', array(&$this, 'edited'));
 		add_action('user_register', array(&$this, 'save_form_fields'));
 		add_action('user_register', array(&$this, 'user_register'), 1000);
 		
 		add_action('register_form', array(&$this, 'register_form'));
 		add_filter('registration_errors', array(&$this, 'registration_errors'), 10, 3);
 		
-		add_filter('authenticate', array(&$this, 'authenticate'), 10, 3);
+		add_filter('authenticate', array(&$this, 'authenticate'), 40, 3);
 		add_filter('retrieve_password', array(&$this, 'retrieve_password'));
+		
+		add_action('wp_logout', array(&$this, 'logout'));
 	}
 	
 	public function get_field($user, $field, $default = null) {
@@ -156,16 +159,34 @@ abstract class SktProfile extends SktFieldManager {
 		foreach($this->fieldnames() as $field) {
 			$attrs = $this->fieldattrs($field);
 			
-			if($user->ID) {
-				if(isset($attrs['edit']) && $attrs['edit'] == false) {
-					continue;
-				}
+			if(isset($attrs['edit']) && $attrs['edit'] == false) {
+				continue;
 			}
 			
 			if($value = $this->POST($field)) {
 				$this->set_field($user_id, $field, $value);
 			} else {
 				$this->delete_field($user_id, $field);
+			}
+		}
+	}
+	
+	public function edited($user_id) {
+		$data = array();
+		
+		foreach($this->fieldnames() as $field) {
+			$attrs = $this->fieldattrs($field);
+			$data[$field] = $this->get_field($user_id, $field,
+				isset($attrs['default']) ? $attrs['default'] : null
+			);
+		}
+		
+		$this->user_updated($user_id, $data);
+		if(isset($_POST['pass1']) && !empty($_POST['pass1'])) {
+			if(isset($_POST['pass2']) && !empty($_POST['pass2'])) {
+				if($_POST['pass1'] == $_POST['pass2']) {
+					$this->user_changed_password($user_id, $_POST['pass2'], $data);
+				}
 			}
 		}
 	}
@@ -255,9 +276,17 @@ abstract class SktProfile extends SktFieldManager {
 		// Runs when a user is added via the admin site
 	}
 	
+	protected function user_updated($user_id, $data) {
+		// Runs when a user's details is updated
+	}
+	
 	public function authenticate($user, $username, $password) {
 		// Adds custom authentication
-		return $use;
+		return $user;
+	}
+	
+	protected function user_changed_password($user_id, $password, $data) {
+		// User password updates
 	}
 	
 	public function retrieve_password($username) {
@@ -272,5 +301,15 @@ abstract class SktProfile extends SktFieldManager {
 				}
 			}
 		}
+	}
+	
+	public function logout() {
+		$this->user_logged_out(
+			get_current_user_id()
+		);
+	}
+	
+	protected function user_logged_out($user_id) {
+		// Runs when a user's details is updated
 	}
 }

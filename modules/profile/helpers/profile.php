@@ -13,8 +13,13 @@
 				do_action('personal_options_update', $user_id);
 				$errors = edit_user($user_id);
 				if (!is_wp_error($errors)) {
-					$redirect = add_query_arg('updated', true, get_edit_user_link($user_id));
-					wp_redirect($redirect);
+					do_action('skt_user_edited', $user_id);
+					wp_redirect(
+						add_query_arg('updated', true,
+							get_edit_user_link($user_id)
+						)
+					);
+					
 					exit();
 				}
 				
