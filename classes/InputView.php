@@ -352,7 +352,11 @@ class SktInputView extends SktView {
 		$this->html .= '<' . $tag . ' name="' . $name . '"';
 		
 		if($add_type) {
-			$this->html .= ' type="' . esc_attr($type) . '"';
+			if($type == 'colour' || $type == 'color') {
+				$this->html .= ' type="text" data-type="colour"';
+			} else {
+				$this->html .= ' type="' . esc_attr($type) . '"';
+			}
 		}
 		
 		if(isset($attrs['default'])) {
@@ -377,6 +381,12 @@ class SktInputView extends SktView {
 				if(!is_bool($value)) {
 					$this->html .= '="' . esc_attr($value) . '"';
 				}
+			}
+		}
+		
+		if($type == 'colour' || $type == 'color') {
+			if(!isset($attrs['size'])) {
+				$this->html .= ' size="7"';
 			}
 		}
 		

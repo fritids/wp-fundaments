@@ -61,12 +61,14 @@ abstract class SktPostType extends SktCapable {
 	}
 	
 	public function fieldeditable($name) {
-		foreach($this->meta_boxes as $key => $box) {
-			if(is_array($box) && isset($box['fields']) && isset($box['capabilities'])) {
-				if(in_array($name, $box['fields'])) {
-					foreach($box['capabilities'] as $capability) {
-						if(!current_user_can($capability)) {
-							return false;
+		if(isset($this->meta_boxes)) {
+			foreach($this->meta_boxes as $key => $box) {
+				if(is_array($box) && isset($box['fields']) && isset($box['capabilities'])) {
+					if(in_array($name, $box['fields'])) {
+						foreach($box['capabilities'] as $capability) {
+							if(!current_user_can($capability)) {
+								return false;
+							}
 						}
 					}
 				}

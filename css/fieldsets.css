@@ -1,3 +1,20 @@
+#poststuff .skt-field {
+	margin-left: -12px; margin-right: -12px;
+	padding: 12px;
+	border-top: 1px solid #eee;
+}
+
+#poststuff .skt-field.skt-first { border-top-width: 0; padding-top: 0 }
+#poststuff .skt-field.skt-last { padding-bottom: 0; }
+#poststuff .skt-field .wp-editor-wrap { margin-top: -2em; }
+
+#poststuff p.skt-label {
+	line-height: 1.25em;
+	margin: 0 0 0.25em 0; padding: 0;
+	color: #666666;
+	text-shadow: 0 1px 0 #FFFFFF;
+}
+
 .skt-fieldset-table { width: 100%; }
 .skt-fieldset-table th.skt-field-delete, .skt-fieldset-table td.skt-field-delete { width: 26px; }
 .skt-fieldset-table th, .skt-fieldset-table td { text-align: left; }

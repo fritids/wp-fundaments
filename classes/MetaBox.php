@@ -15,6 +15,7 @@ class SktMetaBox extends SktView {
 	function render() {
 		global $post;
 		
+		$first = true;
 		if($this->view && $GLOBALS['skt_fundaments']->view_exists($this->post_type->plugin, $this->view)) {
 			$context = array('post' => $post);
 			
@@ -25,15 +26,19 @@ class SktMetaBox extends SktView {
 			
 			$GLOBALS['skt_fundaments']->view($this->post_type->plugin, $this->view, $context);
 		} elseif(count($this->fields) > 0) {
-			foreach($this->fields as $field) {
+			foreach($this->fields as $i => $field) {
 				if(!$this->post_type->fieldeditable($field)) {
 					continue;
 				}
 				
+				$last = $i == count($this->fields) - 1;
+				echo '<div class="skt-field'  . ($first ? ' skt-first' : '') . ($last ? ' skt-last' : '') . '">';
+				$first = false;
+				
 				switch($field) {
 					case '_parent':
 						if(count($this->fields) > 1) {
-							echo $this->post_type->fieldlabel($field) . '<br />';
+							echo '<p class="skt-label">' . $this->post_type->fieldlabel($field) . '</p>';
 						}
 						
 						echo $GLOBALS['skt_fundaments']->input(
@@ -46,7 +51,6 @@ class SktMetaBox extends SktView {
 							)
 						);
 						
-						echo '<br />';
 						break;
 					default:
 						$type = $this->post_type->fieldtype($field);
@@ -57,16 +61,16 @@ class SktMetaBox extends SktView {
 						);
 						
 						if($this->label) {
-							echo $this->post_type->fieldlabel($field) . '<br />';
+							echo '<p class="skt-label">' . $this->post_type->fieldlabel($field) . '</p>';
 						}
 						
 						echo $GLOBALS['skt_fundaments']->input(
 							$this->post_type->fieldname($field),
 							$attrs
 						);
-						
-						echo '<br />';
 				}
+				
+				echo '</div>';
 			}
 		}
 	}

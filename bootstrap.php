@@ -49,18 +49,24 @@ function skt_fundaments_init() {
 		array('jquery')
 	);
 	
+	wp_register_script('skt-colour-picker', WP_PLUGIN_URL . '/skt-fundaments/js/colour.js',
+		array('wp-color-picker')
+	);
+	
 	do_action('skt_bootstrap');
 }
 
 function skt_fundaments_admin_styles() {
 	wp_enqueue_media();
 	wp_enqueue_style('skt-fieldsets');
+	wp_enqueue_style('wp-color-picker');
 }
 
 function skt_fundaments_admin_scripts() {
 	wp_enqueue_script('skt-date');
 	wp_enqueue_script('skt-fieldsets');
 	wp_enqueue_script('skt-media-uploader');
+	wp_enqueue_script('skt-colour-picker');
 }
 
 function skt_fundaments_cron_schedules($schedules) {
