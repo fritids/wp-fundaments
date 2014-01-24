@@ -13,7 +13,7 @@ if($provider = skt_get_provider($theme, 'payment')) {
 		wp_die($ex->getMessage());
 	}
 	
-	if($success) {
+	if(!$success) {
 		try {
 			$provider->authorise($status);
 		} catch (Exception $ex) {

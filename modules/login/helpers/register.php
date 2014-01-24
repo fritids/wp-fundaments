@@ -185,7 +185,7 @@ function skt_register_form_print() {
 		<p id="reg_passmail"><?php do_action('skt_register_form_footer') ?></p>
 		<p class="submit">
 			<?php wp_nonce_field(basename(__file__), 'skt-fundaments-register'); ?>
-			<input tabindex="4" type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Sign up'); ?>" tabindex="100" />
+			<?php do_action('skt_register_button'); ?>
 		</p>
 	</form>
 <?php }

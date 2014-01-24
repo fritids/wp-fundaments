@@ -34,3 +34,8 @@ function skt_signup_field($fname, $attrs) {
 		</label>
 	</p>
 <?php }
+
+add_action('skt_register_button', 'skt_register_button', 10);
+function skt_register_button() { ?>
+	<input tabindex="4" type="submit" name="wp-submit" id="wp-submit" value="<?php _e('Sign up'); ?>" tabindex="100" />
+<?php }

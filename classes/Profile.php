@@ -45,7 +45,6 @@ abstract class SktProfile extends SktFieldManager {
 		add_action('edit_user_profile_update', array(&$this, 'save_form_fields'));
 		add_action('personal_options_update', array(&$this, 'save_form_fields'));
 		add_action('skt_user_edited', array(&$this, 'edited'));
-		add_action('user_register', array(&$this, 'save_form_fields'));
 		add_action('user_register', array(&$this, 'user_register'), 1000);
 		
 		add_action('register_form', array(&$this, 'register_form'));
@@ -238,6 +237,10 @@ abstract class SktProfile extends SktFieldManager {
 			}
 			
 			if($value = $this->POST($key)) {
+				if(method_exists($this, "validate_${key}")) {
+					call_user_method("validate_${key}", $this, $value, $errors);
+				}
+				
 				continue;
 			}
 			
@@ -256,11 +259,24 @@ abstract class SktProfile extends SktFieldManager {
 		
 		foreach($this->fieldnames() as $field) {
 			$attrs = $this->fieldattrs($field);
-			$data[$field] = $this->get_field($user_id, $field,
-				isset($attrs['default']) ? $attrs['default'] : null
-			);
+			
+			if(isset($attrs['register']) && $attrs['register'] == false) {
+				continue;
+			}
+			
+			$attrs = $this->fieldattrs($field);
+			if($value = $this->POST($field)) {
+				$this->set_field($user_id, $field, $value);
+				$data[$field] = skt_unserialise_field_value(
+					$value,
+					isset($attrs['type']) ? $attrs['type'] : 'text'
+				);
+			} elseif(isset($attrs['default'])) {
+				$this->set_field($user_id, $field, $attrs['default']);
+				$data[$field] = $attrs['default'];
+			}
 		}
-		
+
 		if(!is_admin()) {
 			$this->user_registered($user_id, $data);
 		} else {

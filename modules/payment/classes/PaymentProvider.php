@@ -69,6 +69,19 @@
 			skt_update_field('total', $total, $id);
 			skt_update_field('trial_period', $subscription['trial_period'], $id);
 			skt_update_field('trial_amount', intVal($subscription['trial_amount']), $id);
+
+			if(isset($subscription['discount_amount'])) {
+				skt_update_field('discount_amount', intVal($subscription['discount_amount']), $id);
+			}
+			
+			if(isset($subscription['discount_period'])) {
+				skt_update_field('discount_period', $subscription['discount_period'], $id);
+			}
+
+			if(isset($subscription['discount_length'])) {
+				skt_update_field('discount_length', intVal($subscription['discount_length']), $id);
+			}
+
 			$posts[] = get_post($id);
 		}
 		

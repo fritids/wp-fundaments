@@ -266,24 +266,48 @@ class SktInputView extends SktView {
 						)
 					);
 					
-					$this->html .= '<select id="' . $id . '" name="' . $name . '"';
-					if($multiple) {
-						$this->html .= ' multiple>';
-					} else {
-						$this->html .= '><option value="">---------</option>';
-					}
-					
-					foreach($posts as $i => $p) {
-						$this->html .= '<option value="' . $p->ID . '"';
-						
-						if(in_array($p->ID, $vv)) {
-							$this->html .= ' selected';
+					if(isset($attrs['format']) && $attrs['format'] == 'radio') {
+						$this->html .= '<ul';
+						if(isset($attrs['class'])) {
+							$this->html .= ' class="' . esc_attr($attrs['class']) . '"';
 						}
 						
-						$this->html .= '>' . htmlentities($p->post_title) . '</option>';
+						$this->html .= '>';
+						foreach($posts as $i => $p) {
+							$this->html .= '<li>';
+							$this->html .= '<label><input type="' . ($multiple ? 'checkbox' : 'radio') . '" name="' . $name . ($multiple ? '[]' : '') . '" ';
+							$this->html .= 'value="' . $p->ID . '"';
+							
+							if(in_array($p->ID, $vv)) {
+								$this->html .= ' checked';
+							}
+							
+							$this->html .= ' /> ' . esc_html($p->post_title) . '</label>';
+							$this->html .= '</li>';
+						}
+						
+						$this->html .= '</ul>';
+					} else {
+						$this->html .= '<select id="' . $id . '" name="' . $name . '"';
+						if($multiple) {
+							$this->html .= ' multiple>';
+						} else {
+							$this->html .= '><option value="">---------</option>';
+						}
+					
+						foreach($posts as $i => $p) {
+							$this->html .= '<option value="' . $p->ID . '"';
+						
+							if(in_array($p->ID, $vv)) {
+								$this->html .= ' selected';
+							}
+						
+							$this->html .= '>' . htmlentities($p->post_title) . '</option>';
+						}
+					
+						$this->html .= '</select>';
 					}
 					
-					$this->html .= '</select>';
 					return;
 				}
 				
