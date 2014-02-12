@@ -223,6 +223,8 @@ abstract class SktProfile extends SktFieldManager {
 	}
 	
 	public function registration_errors($errors, $sanitized_user_login, $user_email) {
+		$data = array();
+		
 		foreach($this->fields as $field => $opts) {
 			if(is_array($opts)) {
 				$key = $field;
@@ -249,6 +251,12 @@ abstract class SktProfile extends SktFieldManager {
 					'<strong>ERROR</strong>: ' . _('The ' . skt_ucwords(str_replace('_', ' ', $key)) . '</strong> field is required.')
 				);
 			}
+			
+			$data[$key] = $value;
+		}
+		
+		if(method_exists($this, 'validate')) {
+			call_user_method('validate', $this, $data, $errors);
 		}
 		
 		return $errors;
