@@ -121,7 +121,11 @@ abstract class SktFieldManager {
 				$month = isset($_POST["${fieldname}_month"]) ? intVal($_POST["${fieldname}_month"]) : 0;
 				$day = isset($_POST["${fieldname}_day"]) ? intVal($_POST["${fieldname}_day"]) : 0;
 				
-				return mktime(0, 0, 0, $month, $day, $year);
+				if($year > 0 && $month > 0 && $day > 0) {
+					return mktime(0, 0, 0, $month, $day, $year);
+				}
+				
+				return null;
 			case 'datetime':
 				$year = isset($_POST["${fieldname}_year"]) ? intVal($_POST["${fieldname}_year"]) : 0;
 				$month = isset($_POST["${fieldname}_month"]) ? intVal($_POST["${fieldname}_month"]) : 0;

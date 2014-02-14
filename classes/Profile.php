@@ -284,7 +284,7 @@ abstract class SktProfile extends SktFieldManager {
 				$data[$field] = $attrs['default'];
 			}
 		}
-
+		
 		if(!is_admin()) {
 			$this->user_registered($user_id, $data);
 		} else {
