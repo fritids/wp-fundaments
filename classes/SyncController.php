@@ -91,7 +91,7 @@ class SktSyncController {
 	<?php }
 	
 	public function sync($status_callback = null) {
-		$status_callback && call_user_func($status_callback, 'Getting data from remove server');
+		$status_callback && call_user_func($status_callback, 'Getting data from remote server');
 		
 		try {
 			$data = $this->get_data();
