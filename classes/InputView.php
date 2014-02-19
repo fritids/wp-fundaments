@@ -78,7 +78,10 @@ class SktInputView extends SktView {
 				$months[$i] = date('F', mktime(0, 0, 0, $i, 1, $now_year));
 			}
 			
-			$months = apply_filters('skt_formfield_months', $months, $name);
+			if($new_months = apply_filters('skt_formfield_months', $months, $name)) {
+				$months = $new_months;
+			}
+			
 			foreach($months as $i => $month_name) {
 				$this->html .= '<option value="' . $i . '"';
 				
@@ -96,7 +99,9 @@ class SktInputView extends SktView {
 				$years[] = $i;
 			}
 			
-			$years = apply_filters('skt_formfield_years', $years, $name);
+			if($new_years = apply_filters('skt_formfield_years', $years, $name)) {
+				$years = $new_years;
+			}
 			
 			foreach($years as $i) {
 				$this->html .= '<option value="' . $i . '"';
