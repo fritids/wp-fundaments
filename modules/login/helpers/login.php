@@ -49,8 +49,9 @@
 	}
 	
 	$GLOBALS['skt_login_errors'] = $errors;
-	
+	add_action('skt_login_form', 'skt_login_form_print');
 	$login_path = get_template_directory(). '/wp-login.php';
+	
 	if(isset($_GET['loggedout']) && $_GET['loggedout'] == 'true') {
 		$logged_out_path = get_template_directory(). '/wp-logout.php';
 		
@@ -65,7 +66,6 @@
 	}
 }
 
-add_action('skt_login_form', 'skt_login_form_print');
 function skt_login_form_print() {
 	global $pagenow;
 	if (isset($_GET['action']) && $_GET['action'] != 'login') {

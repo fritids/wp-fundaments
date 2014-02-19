@@ -23,41 +23,6 @@ class SktFundamentsContext {
 			require_once($filename);
 		}
 		
-		foreach(glob($path . '/providers/*') as $filename) {
-			if(is_dir($filename)) {
-				$type = basename($filename);
-				if(!$type) {
-					continue;
-				}
-				
-				foreach(glob($filename . '/_*.php') as $f) {
-					require_once($f);
-				}
-				
-				foreach(glob($filename . '/*.php') as $n) {
-					$basename = basename($n);
-					if(substr($basename, strlen($basename) - 4) == '.php') {
-						$basename = substr($basename, 0, strlen($basename) - 4);
-					}
-					
-					if(substr($basename, 0, 1) == '_') {
-						continue;
-					}
-					
-					require_once($n);
-					$class = str_replace(' ', '', skt_ucwords(str_replace('_', ' ', $basename))) . 'Provider';
-					if(!class_exists($class)) {
-						wp_die(
-							skt_ucwords(str_replace('_', ' ', $type)) . ' ' .
-							"Provider <code>$basename</code> detected, but no <code>$class</code> class found"
-						);
-					}
-					
-					skt_register_provider($base, $type, $class);
-				}
-			}
-		}
-		
 		foreach(glob($path . '/post_types/*.php') as $filename) {
 			require_once($filename);
 			$basename = basename($filename);
@@ -101,6 +66,41 @@ class SktFundamentsContext {
 			}
 			
 			$this->add_settings_page($base, $basename, $class);
+		}
+		
+		foreach(glob($path . '/providers/*') as $filename) {
+			if(is_dir($filename)) {
+				$type = basename($filename);
+				if(!$type) {
+					continue;
+				}
+				
+				foreach(glob($filename . '/_*.php') as $f) {
+					require_once($f);
+				}
+				
+				foreach(glob($filename . '/*.php') as $n) {
+					$basename = basename($n);
+					if(substr($basename, strlen($basename) - 4) == '.php') {
+						$basename = substr($basename, 0, strlen($basename) - 4);
+					}
+					
+					if(substr($basename, 0, 1) == '_') {
+						continue;
+					}
+					
+					require_once($n);
+					$class = str_replace(' ', '', skt_ucwords(str_replace('_', ' ', $basename))) . 'Provider';
+					if(!class_exists($class)) {
+						wp_die(
+							skt_ucwords(str_replace('_', ' ', $type)) . ' ' .
+							"Provider <code>$basename</code> detected, but no <code>$class</code> class found"
+						);
+					}
+					
+					skt_register_provider($base, $type, $class);
+				}
+			}
 		}
 		
 		foreach(glob($path . '/widgets/*.php') as $filename) {
@@ -257,7 +257,15 @@ class SktFundamentsContext {
 	}
 	
 	function get_settings_page($plugin, $page) {
-		return $this->settings[$plugin][$page];
+		if($settings = isset($this->settings[$plugin]) ? $this->settings[$plugin] : null) {
+			if($settings_page = isset($settings[$page]) ? $settings[$page] : null) {
+				return $settings_page;
+			}
+			
+			wp_die("Can\'t find plugin <code>$plugin</code>");
+		}
+		
+		wp_die("Can\'t find settings page <code>$page</strong> for plugin <code>$plugin</code>");
 	}
 	
 	private function add_widget($plugin, $widget_class) {

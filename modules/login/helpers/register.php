@@ -104,7 +104,9 @@ function skt_register_form() {
 		$GLOBALS['skt_login_errors'] = $errors;
 	}
 	
+	add_action('skt_login_form', 'skt_register_form_print');
 	$path = get_template_directory(). '/wp-register.php';
+	
 	if(is_file($path)) {
 		include($path);
 	} else {
@@ -115,7 +117,6 @@ function skt_register_form() {
 	}
 }
 
-add_action('skt_login_form', 'skt_register_form_print');
 function skt_register_form_print() {
 	global $pagenow;
 	if (!isset($_GET['action']) || $_GET['action'] != 'register') {
@@ -189,3 +190,29 @@ function skt_register_form_print() {
 		</p>
 	</form>
 <?php }
+
+function skt_register_complete() {
+	if (!get_option('users_can_register')) {
+		wp_redirect(
+			get_bloginfo('wpurl') . '/wp-login.php?registration=disabled'
+		);
+		
+		exit();
+	}
+	
+	add_action('skt_login_form', 'skt_register_complete_print');
+	$path = get_template_directory(). '/wp-register.php';
+	
+	if(is_file($path)) {
+		include($path);
+	} else {
+		$path = get_template_directory(). '/wp-login.php';
+		if(is_file($path)) {
+			include($path);
+		}
+	}
+}
+
+function skt_register_complete_print() {
+	print('Your account has been setup. Please check your inbox for an email from ' . get_bloginfo('title') . '.');
+}

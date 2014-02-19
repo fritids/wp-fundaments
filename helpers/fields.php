@@ -23,7 +23,7 @@ function skt_unserialise_field_value($value, $type = 'text') {
 				
 				return $vv;
 			} else {
-				return $value ? get_post($value) : $deafult;
+				return $value ? get_post($value) : null;
 			}
 		case 'number':
 			return intVal($value);
@@ -45,7 +45,7 @@ function skt_unserialise_field_value($value, $type = 'text') {
 					
 					return $vv;
 				} else {
-					return $value ? get_post($value) : $deafult;
+					return $value ? get_post($value) : null;
 				}
 			}
 			

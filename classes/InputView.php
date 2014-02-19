@@ -397,7 +397,7 @@ class SktInputView extends SktView {
 					continue;
 				}
 				
-				if($key == 'value' && $embed_value) {
+				if($attr == 'value' && $embed_value) {
 					continue;
 				}
 				

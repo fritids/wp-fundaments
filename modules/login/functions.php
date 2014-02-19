@@ -11,21 +11,32 @@
 				$action = 'login';
 			}
 			
+			if (isset($_REQUEST['checkemail'])) {
+				$checkemail = $_REQUEST['checkemail'];
+			} else {
+				$checkemail = null;
+			}
+			
 			switch($action) {
 				case 'lostpassword': case 'retrievepassword':
 					skt_password_form();
-					break;
+					die();
 				case 'register':
 					skt_register_form();
-					break;
+					die();
 				default:
+					switch($checkemail) {
+						case 'registered':
+							do_action('skt_register_redirect');
+							skt_register_complete();
+							die();
+					}
+					
 					skt_login_form();
+					die();
 			}
-			
-			die();
 		}
 	}
-	
 	
 	add_filter('wp_title','skt_login_title');
 	function skt_login_title($title) {

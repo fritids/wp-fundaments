@@ -35,7 +35,7 @@ abstract class SktSettingsPageBase extends SktFieldManager {
 		}
 		
 		if(!isset($this->pagename)) {
-			$this->pagename = $new_basename;
+			$this->pagename = str_replace('_', ' ', $new_basename);
 		}
 		
 		$this->basename = strtolower($new_basename);

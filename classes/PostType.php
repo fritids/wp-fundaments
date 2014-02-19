@@ -243,7 +243,9 @@ abstract class SktPostType extends SktCapable {
 					}
 				}
 				
+				$view = 'post_types/' . $this->basename . '/meta/' . (is_array($box) ? $key : $box);
 				$has_view = false;
+				
 				if($GLOBALS['skt_fundaments']->view_exists($this->plugin, $view)) {
 					if(isset($this->fields)) {
 						foreach($fields as $field) {
@@ -274,9 +276,7 @@ abstract class SktPostType extends SktCapable {
 					continue;
 				}
 				
-				$view = 'post_types/' . $this->basename . '/meta/' . (is_array($box) ? $key : $box);
 				$usable_fields = array();
-				
 				if(is_array($box) && isset($box['fields'])) {
 					foreach($box['fields'] as $field) {
 						if($this->fieldeditable($field)) {

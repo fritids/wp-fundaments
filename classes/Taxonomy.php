@@ -95,7 +95,7 @@ abstract class SktTaxonomy extends SktCapable {
 		
 		if(isset($this->parent_item_colon)) {
 			$args['parent_item_colon'] = $this->parent_item_colon;
-		} else {
+		} elseif(isset($args['parent_item'])) {
 			$args['parent_item_colon'] = $args['parent_item'] . ':';
 		}
 		

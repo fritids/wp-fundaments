@@ -25,7 +25,9 @@ require_once('constants.php');
 $GLOBALS['skt_fundaments'] = new SktFundamentsContext();
 
 global $pagenow;
-if ($pagenow == "wp-login.php" && $_GET['action'] != 'logout' && !isset($_GET['key'])) {
+if ($pagenow == "wp-login.php" && (isset($_GET['action']) ? $_GET['action'] : null) != 'logout' && !isset($_GET['key'])) {
+	skt_load_module('login');
+} elseif ($pagenow == "wp-login.php" && isset($_GET['checkemail'])) {
 	skt_load_module('login');
 } elseif(is_admin()) {
 	skt_load_module('profile');
