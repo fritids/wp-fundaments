@@ -38,10 +38,5 @@ jQuery(document).ready(
 				frame.open();
 			}
 		);
-		
-		window.send_to_editor = function(html) {
-			alert(html);
-			tb_remove();
-		};
 	}
 );

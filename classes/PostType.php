@@ -348,7 +348,7 @@ abstract class SktPostType extends SktCapable {
 			return;
 		}
 		
-		if($_POST['post_type'] != $this->basename) {
+		if((isset($_POST['post_type']) ? $_POST['post_type'] : 'post') != $this->basename) {
 			return;
 		}
 		
