@@ -88,6 +88,18 @@
 		return $posts;
 	}
 	
+	public function cancel_subscription($subscription) {
+		if(!is_object($subscription)) {
+			$subscription = get_post($subscription);
+		}
+		
+		if(!$subscription) {
+			wp_die('No subscription found');
+		}
+		
+		return false;
+	}
+	
 	public function authorise($token) {
 		global $post;
 		
