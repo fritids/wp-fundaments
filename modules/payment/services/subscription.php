@@ -13,9 +13,10 @@ if($provider = skt_get_provider($theme, 'payment')) {
 		wp_die($ex->getMessage());
 	}
 	
-	if(!$success) {
+	if($success) {
+		$provider->authorise($status);
 		try {
-			$provider->authorise($status);
+			// $provider->authorise($status);
 		} catch (Exception $ex) {
 			$orders = new SKT_Query('subscription',
 				array(
@@ -53,6 +54,7 @@ if($provider = skt_get_provider($theme, 'payment')) {
 		if($success) {
 			$url = skt_get_field('return_url');
 			skt_update_field('status', 'complete');
+			skt_update_field('transaction_id', $status['transaction_id']);
 			do_action('skt_payment_complete', $status, $post->ID);
 		} else {
 			$url = skt_get_field('cancel_url');
