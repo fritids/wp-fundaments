@@ -14,9 +14,8 @@ if($provider = skt_get_provider($theme, 'payment')) {
 	}
 	
 	if($success) {
-		$provider->authorise($status);
 		try {
-			// $provider->authorise($status);
+			$provider->authorise($status);
 		} catch (Exception $ex) {
 			$orders = new SKT_Query('subscription',
 				array(
